@@ -174,7 +174,7 @@ button:disabled {
   padding: 15px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .siparis-kart.bekliyor {
@@ -194,23 +194,86 @@ button:disabled {
   flex: 1;
 }
 
-.siparis-bilgi h4 {
-  margin-top: 0;
+.siparis-baslik {
+  display: flex;
+  align-items: center;
   margin-bottom: 10px;
 }
 
-.siparis-bilgi p {
+.siparis-baslik h4 {
+  margin: 0;
+  margin-right: 10px;
+}
+
+.oncelik-rozet {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+}
+
+.oncelik-rozet.oncelik-1 {
+  background-color: #dc3545; /* Yüksek öncelik */
+}
+
+.oncelik-rozet.oncelik-2 {
+  background-color: #fd7e14; /* Orta öncelik */
+}
+
+.oncelik-rozet.oncelik-3 {
+  background-color: #6c757d; /* Düşük öncelik */
+}
+
+.siparis-detaylar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.detay-grup p {
   margin: 5px 0;
+  font-size: 14px;
 }
 
 .siparis-butonlar {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  margin-left: 15px;
 }
 
 .siparis-butonlar button {
   width: 100px;
+}
+
+/* Sıralama başlıkları */
+.siralama-basliklar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.siralama-baslik {
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 5px;
+  transition: background-color 0.2s;
+}
+
+.siralama-baslik:hover {
+  background-color: #e9ecef;
+  border-radius: 3px;
+}
+
+.siralama-baslik.aktif {
+  color: #0d6efd;
 }
 
 /* Form stilleri */
@@ -231,12 +294,30 @@ button:disabled {
 }
 
 .form-grup input[type="text"],
+.form-grup input[type="date"],
+.form-grup input[type="number"],
 .form-grup select {
   width: 100%;
   padding: 8px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.manuel-secim {
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.manuel-secim input[type="checkbox"] {
+  margin-right: 8px;
 }
 
 .istasyon-secenekleri {

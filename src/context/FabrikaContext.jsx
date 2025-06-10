@@ -10,8 +10,33 @@ export const FabrikaProvider = ({ children }) => {
     { id: 'kesim', name: 'Intermac Kesim' },
     { id: 'rodaj', name: 'Rodaj' },
     { id: 'temper', name: 'Temper' },
+    { id: 'isicam', name: 'Isıcam' },
     { id: 'lamine', name: 'Lamine' },
     { id: 'montaj', name: 'Montaj' }
+  ]);
+
+  // Kombinasyonlar için veri (cam türleri ve izleyecekleri süreçler)
+  const [kombinasyonlar] = useState([
+    { 
+      id: '6mm-coolplus-62-44', 
+      name: '6 mm Coolplus 62/44',
+      istasyonlar: ['kesim', 'rodaj', 'temper', 'isicam']
+    },
+    { 
+      id: '8mm-lamine', 
+      name: '8 mm Lamine',
+      istasyonlar: ['kesim', 'rodaj', 'lamine']
+    },
+    { 
+      id: '10mm-temperli', 
+      name: '10 mm Temperli',
+      istasyonlar: ['kesim', 'rodaj', 'temper']
+    },
+    { 
+      id: '4mm-duz', 
+      name: '4 mm Düz Cam',
+      istasyonlar: ['kesim', 'isicam']
+    }
   ]);
 
   // Siparişler için veri
@@ -20,11 +45,37 @@ export const FabrikaProvider = ({ children }) => {
   // Aktif görünüm için durum (Admin veya İstasyon)
   const [aktifGorunum, setAktifGorunum] = useState('admin');
 
+  // Sipariş sıralama seçenekleri
+  const [siralama, setSiralama] = useState({
+    alan: 'siparisNo',
+    artan: true
+  });
+
   // Yeni sipariş oluşturma fonksiyonu
-  const siparisOlustur = (siparisAdi, oncelik, secilenIstasyonlar) => {
-    const istasyonSirasi = istasyonlar
-      .filter(istasyon => secilenIstasyonlar.includes(istasyon.id))
-      .map(istasyon => istasyon.id);
+  const siparisOlustur = (siparisData) => {
+    const {
+      siparisAdi,
+      siparisNo,
+      siparisTarihi,
+      teslimTarihi,
+      musteri,
+      cariUnvan,
+      kombinasyonId,
+      toplamMiktar,
+      oncelik,
+      secilenIstasyonlar
+    } = siparisData;
+
+    // Kombinasyon seçildiyse onun istasyonlarını kullan, yoksa manüel seçilen istasyonları kullan
+    let istasyonSirasi;
+    if (kombinasyonId) {
+      const seciliKombinasyon = kombinasyonlar.find(k => k.id === kombinasyonId);
+      istasyonSirasi = seciliKombinasyon ? seciliKombinasyon.istasyonlar : [];
+    } else {
+      istasyonSirasi = istasyonlar
+        .filter(istasyon => secilenIstasyonlar.includes(istasyon.id))
+        .map(istasyon => istasyon.id);
+    }
 
     if (istasyonSirasi.length === 0) {
       alert('En az bir istasyon seçmelisiniz!');
@@ -34,6 +85,17 @@ export const FabrikaProvider = ({ children }) => {
     const yeniSiparis = {
       id: Date.now().toString(),
       siparisAdi,
+      siparisNo,
+      siparisTarihi,
+      teslimTarihi,
+      gun: hesaplaGunSayisi(siparisTarihi, teslimTarihi),
+      musteri,
+      cariUnvan,
+      kombinasyonId,
+      kombinasyonAdi: kombinasyonId ? 
+        kombinasyonlar.find(k => k.id === kombinasyonId)?.name : 
+        'Özel Kombinasyon',
+      toplamMiktar: parseFloat(toplamMiktar) || 0,
       oncelik: parseInt(oncelik),
       olusturmaTarihi: new Date().toISOString(),
       istasyonSirasi,
@@ -47,6 +109,19 @@ export const FabrikaProvider = ({ children }) => {
     };
 
     setSiparisler(oncekiSiparisler => [...oncekiSiparisler, yeniSiparis]);
+  };
+
+  // Gün sayısını hesaplama yardımcı fonksiyonu
+  const hesaplaGunSayisi = (baslangic, bitis) => {
+    if (!baslangic || !bitis) return 0;
+    
+    const baslangicTarihi = new Date(baslangic);
+    const bitisTarihi = new Date(bitis);
+    
+    // Milisaniye cinsinden fark
+    const farkMilisaniye = bitisTarihi - baslangicTarihi;
+    // Gün cinsinden fark (86400000 ms = 1 gün)
+    return Math.ceil(farkMilisaniye / 86400000);
   };
 
   // İşe başlama fonksiyonu
@@ -100,31 +175,91 @@ export const FabrikaProvider = ({ children }) => {
     });
   };
 
-  // İstasyon için sipariş filtreleme fonksiyonu
+  // Sıralama fonksiyonu
+  const siralamaDegistir = (alan) => {
+    setSiralama(onceki => {
+      if (onceki.alan === alan) {
+        // Aynı alana tekrar tıklandıysa yönü değiştir
+        return { alan, artan: !onceki.artan };
+      } else {
+        // Farklı bir alana tıklandıysa, yeni alanı artan şekilde sırala
+        return { alan, artan: true };
+      }
+    });
+  };
+
+  // İstasyon için sipariş filtreleme ve sıralama fonksiyonu
   const istasyonSiparisleriGetir = (istasyonId) => {
-    return siparisler
+    const filtrelenmis = siparisler
       .filter(siparis => {
         const istasyonSiraIndex = siparis.istasyonSirasi.indexOf(istasyonId);
         return istasyonSiraIndex === siparis.guncelIstasyonIndex && siparis.durum !== 'Tamamlandı';
-      })
-      .sort((a, b) => {
-        // Önce önceliğe göre sırala (küçük öncelik değeri = yüksek öncelik)
-        if (a.oncelik !== b.oncelik) return a.oncelik - b.oncelik;
-        // Sonra oluşturma tarihine göre sırala (eski önce)
-        return new Date(a.olusturmaTarihi) - new Date(b.olusturmaTarihi);
       });
+
+    return siralaSiparisler(filtrelenmis);
+  };
+
+  // Siparişleri sıralama fonksiyonu
+  const siralaSiparisler = (siparisListesi) => {
+    return [...siparisListesi].sort((a, b) => {
+      let karsilastirma = 0;
+      
+      switch (siralama.alan) {
+        case 'siparisNo':
+          karsilastirma = a.siparisNo.localeCompare(b.siparisNo);
+          break;
+        case 'siparisTarihi':
+          karsilastirma = new Date(a.siparisTarihi) - new Date(b.siparisTarihi);
+          break;
+        case 'teslimTarihi':
+          karsilastirma = new Date(a.teslimTarihi) - new Date(b.teslimTarihi);
+          break;
+        case 'gun':
+          karsilastirma = a.gun - b.gun;
+          break;
+        case 'musteri':
+          karsilastirma = a.musteri.localeCompare(b.musteri);
+          break;
+        case 'cariUnvan':
+          karsilastirma = a.cariUnvan.localeCompare(b.cariUnvan);
+          break;
+        case 'kombinasyonAdi':
+          karsilastirma = a.kombinasyonAdi.localeCompare(b.kombinasyonAdi);
+          break;
+        case 'toplamMiktar':
+          karsilastirma = a.toplamMiktar - b.toplamMiktar;
+          break;
+        case 'oncelik':
+          karsilastirma = a.oncelik - b.oncelik;
+          break;
+        default:
+          // Varsayılan sıralama: önce öncelik, sonra oluşturma tarihi
+          if (a.oncelik !== b.oncelik) {
+            karsilastirma = a.oncelik - b.oncelik;
+          } else {
+            karsilastirma = new Date(a.olusturmaTarihi) - new Date(b.olusturmaTarihi);
+          }
+      }
+      
+      // Artan/azalan sıralama için çarpan
+      return siralama.artan ? karsilastirma : -karsilastirma;
+    });
   };
 
   // Tüm fabrika verilerini ve fonksiyonlarını değer olarak sağla
   const value = {
     istasyonlar,
+    kombinasyonlar,
     siparisler,
     aktifGorunum,
+    siralama,
     setAktifGorunum,
     siparisOlustur,
     iseBasla,
     isiBitir,
-    istasyonSiparisleriGetir
+    istasyonSiparisleriGetir,
+    siralamaDegistir,
+    siralaSiparisler
   };
 
   return (

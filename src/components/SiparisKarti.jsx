@@ -1,7 +1,7 @@
 import { useFabrika } from '../context/FabrikaContext';
 
 const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
-  const { iseBasla, isiBitir, aktifGorunum } = useFabrika();
+  const { iseBasla, isiBitir, aktifGorunum, istasyonlar } = useFabrika();
   
   // Sipariş durumunu kontrol et
   const durum = siparis.durum;
@@ -37,19 +37,62 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
     siparis.oncelik === 1 ? 'Yüksek' : 
     siparis.oncelik === 2 ? 'Orta' : 'Düşük';
   
+  // Tarihleri formatlama
+  const formatTarih = (tarihStr) => {
+    if (!tarihStr) return '-';
+    return new Date(tarihStr).toLocaleDateString('tr-TR');
+  };
+  
+  // İstasyon sırasını formatlama
+  const istasyonSirasiMetni = siparis.istasyonSirasi
+    .map(istId => istasyonlar.find(ist => ist.id === istId)?.name || istId)
+    .join(' → ');
+  
+  // Güncel istasyon
+  const guncelIstasyonId = siparis.istasyonSirasi[siparis.guncelIstasyonIndex];
+  const guncelIstasyon = istasyonlar.find(ist => ist.id === guncelIstasyonId);
+  const guncelIstasyonAdi = guncelIstasyon?.name || '-';
+  
   return (
     <div className={`siparis-kart ${durumSinifi}`}>
       <div className="siparis-bilgi">
-        <h4>{siparis.siparisAdi}</h4>
-        <p>
-          <strong>Öncelik:</strong> {oncelikMetni}
-        </p>
-        <p>
-          <strong>Durum:</strong> {durum}
-        </p>
-        <p>
-          <strong>Oluşturma Tarihi:</strong> {new Date(siparis.olusturmaTarihi).toLocaleString('tr-TR')}
-        </p>
+        <div className="siparis-baslik">
+          <h4>{siparis.siparisAdi}</h4>
+          <span className={`oncelik-rozet oncelik-${siparis.oncelik}`}>
+            {oncelikMetni}
+          </span>
+        </div>
+        
+        <div className="siparis-detaylar">
+          <div className="detay-grup">
+            <p><strong>Sipariş No:</strong> {siparis.siparisNo}</p>
+            <p><strong>Müşteri:</strong> {siparis.musteri}</p>
+            {siparis.cariUnvan && <p><strong>Cari Ünvan:</strong> {siparis.cariUnvan}</p>}
+          </div>
+          
+          <div className="detay-grup">
+            <p>
+              <strong>Sipariş Tarihi:</strong> {formatTarih(siparis.siparisTarihi)}
+            </p>
+            <p>
+              <strong>Teslim Tarihi:</strong> {formatTarih(siparis.teslimTarihi)}
+            </p>
+            <p><strong>Gün:</strong> {siparis.gun}</p>
+          </div>
+          
+          <div className="detay-grup">
+            <p><strong>Kombinasyon:</strong> {siparis.kombinasyonAdi}</p>
+            {siparis.toplamMiktar > 0 && 
+              <p><strong>Toplam Miktar:</strong> {siparis.toplamMiktar} m²</p>
+            }
+            <p><strong>Durum:</strong> {durum}</p>
+          </div>
+          
+          <div className="detay-grup">
+            <p><strong>İş Akışı:</strong> {istasyonSirasiMetni}</p>
+            <p><strong>Güncel İstasyon:</strong> {guncelIstasyonAdi}</p>
+          </div>
+        </div>
       </div>
       
       {istasyonGorunumu && (
