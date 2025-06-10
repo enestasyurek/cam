@@ -1,0 +1,256 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Ana uygulama stilleri */
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1, h2, h3, h4 {
+  color: #333;
+}
+
+/* Görünüm seçici */
+.gorunum-secici {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.gorunum-secici select {
+  margin-left: 10px;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+
+/* Ana içerik düzeni */
+.ana-icerik {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .ana-icerik {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Fabrika ve istasyon kartları */
+.fabrika-kartlari, .istasyon-kartlari {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+  margin: 15px 0;
+}
+
+.fabrika-kart, .istasyon-kart {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.fabrika-kart:hover, .istasyon-kart:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Butonlar */
+button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.geri-button {
+  background-color: #6c757d;
+  color: white;
+  margin-right: 10px;
+}
+
+.geri-button:hover {
+  background-color: #5a6268;
+}
+
+.goruntule-button {
+  background-color: #0d6efd;
+  color: white;
+}
+
+.goruntule-button:hover {
+  background-color: #0b5ed7;
+}
+
+.olustur-button {
+  background-color: #198754;
+  color: white;
+  padding: 10px 20px;
+  font-size: 16px;
+  margin-top: 15px;
+}
+
+.olustur-button:hover {
+  background-color: #157347;
+}
+
+button:disabled {
+  background-color: #e9ecef;
+  color: #6c757d;
+  cursor: not-allowed;
+}
+
+.button-group {
+  margin-top: 15px;
+  display: flex;
+}
+
+/* Sipariş kartları */
+.siparisler-listesi {
+  margin-top: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.siparis-kart {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.siparis-kart.bekliyor {
+  border-left: 5px solid #ffc107;
+}
+
+.siparis-kart.islemde {
+  border-left: 5px solid #0dcaf0;
+}
+
+.siparis-kart.tamamlandi {
+  border-left: 5px solid #198754;
+  opacity: 0.7;
+}
+
+.siparis-bilgi {
+  flex: 1;
+}
+
+.siparis-bilgi h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.siparis-bilgi p {
+  margin: 5px 0;
+}
+
+.siparis-butonlar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.siparis-butonlar button {
+  width: 100px;
+}
+
+/* Form stilleri */
+.siparis-olustur-form {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.form-grup {
+  margin-bottom: 15px;
+}
+
+.form-grup label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.form-grup input[type="text"],
+.form-grup select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.istasyon-secenekleri {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.istasyon-secim {
+  display: flex;
+  align-items: center;
+}
+
+.istasyon-secim input[type="checkbox"] {
+  margin-right: 8px;
+}
