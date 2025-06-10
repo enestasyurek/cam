@@ -45,6 +45,7 @@ const IstasyonGoruntule = ({ istasyonId, istasyonGorunumu = false }) => {
             {siralamaBaşligi('cariUnvan', 'Cari Ünvan')}
             {siralamaBaşligi('kombinasyonAdi', 'Kombinasyon')}
             {siralamaBaşligi('toplamMiktar', 'Miktar')}
+            {siralamaBaşligi('adet', 'Adet')}
             {siralamaBaşligi('oncelik', 'Öncelik')}
           </div>
           

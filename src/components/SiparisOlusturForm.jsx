@@ -2,27 +2,26 @@ import { useState } from 'react';
 import { useFabrika } from '../context/FabrikaContext';
 
 const SiparisOlusturForm = () => {
-  const { istasyonlar, kombinasyonlar, siparisOlustur } = useFabrika();
+  const { istasyonlar, siparisOlustur } = useFabrika();
   
   // Form alanları için state
-  const [siparisAdi, setSiparisAdi] = useState('');
   const [siparisNo, setSiparisNo] = useState('');
   const [siparisTarihi, setSiparisTarihi] = useState(new Date().toISOString().split('T')[0]);
   const [teslimTarihi, setTeslimTarihi] = useState('');
   const [musteri, setMusteri] = useState('');
   const [cariUnvan, setCariUnvan] = useState('');
-  const [kombinasyonId, setKombinasyonId] = useState('');
+  const [kombinasyonMetni, setKombinasyonMetni] = useState('');
   const [toplamMiktar, setToplamMiktar] = useState('');
+  const [adet, setAdet] = useState('');
   const [oncelik, setOncelik] = useState('2'); // Varsayılan orta öncelik
   const [secilenIstasyonlar, setSecilenIstasyonlar] = useState([]);
-  const [manuelIstasyonSecimi, setManuelIstasyonSecimi] = useState(false);
   
   // Form gönderme işleyicisi
   const formGonder = (e) => {
     e.preventDefault();
     
-    if (!siparisAdi.trim() || !siparisNo.trim()) {
-      alert('Lütfen sipariş adı ve numarası girin!');
+    if (!siparisNo.trim()) {
+      alert('Lütfen sipariş numarası girin!');
       return;
     }
     
@@ -41,37 +40,41 @@ const SiparisOlusturForm = () => {
       return;
     }
     
-    if (!kombinasyonId && secilenIstasyonlar.length === 0) {
-      alert('Lütfen bir cam kombinasyonu seçin veya en az bir istasyon seçin!');
+    if (!kombinasyonMetni.trim()) {
+      alert('Lütfen cam kombinasyonunu girin!');
+      return;
+    }
+    
+    if (secilenIstasyonlar.length === 0) {
+      alert('Lütfen en az bir istasyon seçin!');
       return;
     }
     
     // Sipariş oluştur
     siparisOlustur({
-      siparisAdi,
       siparisNo,
       siparisTarihi,
       teslimTarihi,
       musteri,
       cariUnvan,
-      kombinasyonId: manuelIstasyonSecimi ? '' : kombinasyonId,
+      kombinasyonMetni,
       toplamMiktar,
+      adet,
       oncelik,
       secilenIstasyonlar
     });
     
     // Formu sıfırla
-    setSiparisAdi('');
     setSiparisNo('');
     setSiparisTarihi(new Date().toISOString().split('T')[0]);
     setTeslimTarihi('');
     setMusteri('');
     setCariUnvan('');
-    setKombinasyonId('');
+    setKombinasyonMetni('');
     setToplamMiktar('');
+    setAdet('');
     setOncelik('2');
     setSecilenIstasyonlar([]);
-    setManuelIstasyonSecimi(false);
   };
   
   // İstasyon seçimi işleyicisi
@@ -85,56 +88,10 @@ const SiparisOlusturForm = () => {
     });
   };
   
-  // Kombinasyon seçimi işleyicisi
-  const kombinasyonSecimDegistir = (e) => {
-    const seciliKombinasyonId = e.target.value;
-    setKombinasyonId(seciliKombinasyonId);
-    
-    if (seciliKombinasyonId && !manuelIstasyonSecimi) {
-      // Seçilen kombinasyona göre istasyonları otomatik seç
-      const seciliKombinasyon = kombinasyonlar.find(k => k.id === seciliKombinasyonId);
-      if (seciliKombinasyon) {
-        setSecilenIstasyonlar(seciliKombinasyon.istasyonlar);
-      }
-    }
-  };
-  
-  // Manuel istasyon seçimi işleyicisi
-  const manuelSecimDegistir = (e) => {
-    const yeniDurum = e.target.checked;
-    setManuelIstasyonSecimi(yeniDurum);
-    
-    if (yeniDurum) {
-      // Manuel seçime geçildiğinde, kombinasyonu temizle
-      setKombinasyonId('');
-    } else if (kombinasyonId) {
-      // Manuel seçimden çıkılıp, bir kombinasyon seçiliyse istasyonları güncelle
-      const seciliKombinasyon = kombinasyonlar.find(k => k.id === kombinasyonId);
-      if (seciliKombinasyon) {
-        setSecilenIstasyonlar(seciliKombinasyon.istasyonlar);
-      }
-    } else {
-      // Manuel seçimden çıkılıp, kombinasyon seçili değilse istasyonları temizle
-      setSecilenIstasyonlar([]);
-    }
-  };
-  
   return (
     <div className="siparis-olustur-form">
       <h2>Yeni Sipariş Oluştur</h2>
       <form onSubmit={formGonder}>
-        <div className="form-grup">
-          <label htmlFor="siparisAdi">Sipariş Adı:</label>
-          <input
-            type="text"
-            id="siparisAdi"
-            value={siparisAdi}
-            onChange={(e) => setSiparisAdi(e.target.value)}
-            placeholder="Sipariş-101"
-            required
-          />
-        </div>
-        
         <div className="form-grup">
           <label htmlFor="siparisNo">Sipariş No:</label>
           <input
@@ -197,44 +154,42 @@ const SiparisOlusturForm = () => {
         
         <div className="form-grup">
           <label htmlFor="kombinasyon">Cam Kombinasyonu:</label>
-          <select
+          <input
+            type="text"
             id="kombinasyon"
-            value={kombinasyonId}
-            onChange={kombinasyonSecimDegistir}
-            disabled={manuelIstasyonSecimi}
-          >
-            <option value="">Seçiniz...</option>
-            {kombinasyonlar.map(kombinasyon => (
-              <option key={kombinasyon.id} value={kombinasyon.id}>
-                {kombinasyon.name}
-              </option>
-            ))}
-          </select>
-          
-          <div className="manuel-secim">
-            <input
-              type="checkbox"
-              id="manuelSecim"
-              checked={manuelIstasyonSecimi}
-              onChange={manuelSecimDegistir}
-            />
-            <label htmlFor="manuelSecim">
-              Manuel İstasyon Seçimi
-            </label>
-          </div>
+            value={kombinasyonMetni}
+            onChange={(e) => setKombinasyonMetni(e.target.value)}
+            placeholder="Örn: 6 mm Coolplus 62/44"
+            required
+          />
         </div>
         
-        <div className="form-grup">
-          <label htmlFor="toplamMiktar">Toplam Miktar (m²):</label>
-          <input
-            type="number"
-            id="toplamMiktar"
-            value={toplamMiktar}
-            onChange={(e) => setToplamMiktar(e.target.value)}
-            placeholder="0.00"
-            step="0.01"
-            min="0"
-          />
+        <div className="form-row">
+          <div className="form-grup">
+            <label htmlFor="toplamMiktar">Toplam Miktar (m²):</label>
+            <input
+              type="number"
+              id="toplamMiktar"
+              value={toplamMiktar}
+              onChange={(e) => setToplamMiktar(e.target.value)}
+              placeholder="0.00"
+              step="0.01"
+              min="0"
+            />
+          </div>
+          
+          <div className="form-grup">
+            <label htmlFor="adet">Adet:</label>
+            <input
+              type="number"
+              id="adet"
+              value={adet}
+              onChange={(e) => setAdet(e.target.value)}
+              placeholder="0"
+              step="1"
+              min="0"
+            />
+          </div>
         </div>
         
         <div className="form-grup">
@@ -250,26 +205,24 @@ const SiparisOlusturForm = () => {
           </select>
         </div>
         
-        {(manuelIstasyonSecimi || !kombinasyonId) && (
-          <div className="form-grup">
-            <label>İstasyonlar:</label>
-            <div className="istasyon-secenekleri">
-              {istasyonlar.map(istasyon => (
-                <div key={istasyon.id} className="istasyon-secim">
-                  <input
-                    type="checkbox"
-                    id={`istasyon-${istasyon.id}`}
-                    checked={secilenIstasyonlar.includes(istasyon.id)}
-                    onChange={() => istasyonSecimDegistir(istasyon.id)}
-                  />
-                  <label htmlFor={`istasyon-${istasyon.id}`}>
-                    {istasyon.name}
-                  </label>
-                </div>
-              ))}
-            </div>
+        <div className="form-grup">
+          <label>İstasyonlar:</label>
+          <div className="istasyon-secenekleri">
+            {istasyonlar.map(istasyon => (
+              <div key={istasyon.id} className="istasyon-secim">
+                <input
+                  type="checkbox"
+                  id={`istasyon-${istasyon.id}`}
+                  checked={secilenIstasyonlar.includes(istasyon.id)}
+                  onChange={() => istasyonSecimDegistir(istasyon.id)}
+                />
+                <label htmlFor={`istasyon-${istasyon.id}`}>
+                  {istasyon.name}
+                </label>
+              </div>
+            ))}
           </div>
-        )}
+        </div>
         
         <button type="submit" className="olustur-button">
           Sipariş Oluştur

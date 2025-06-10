@@ -57,7 +57,7 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
     <div className={`siparis-kart ${durumSinifi}`}>
       <div className="siparis-bilgi">
         <div className="siparis-baslik">
-          <h4>{siparis.siparisAdi}</h4>
+          <h4>{siparis.siparisNo}</h4>
           <span className={`oncelik-rozet oncelik-${siparis.oncelik}`}>
             {oncelikMetni}
           </span>
@@ -65,7 +65,6 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
         
         <div className="siparis-detaylar">
           <div className="detay-grup">
-            <p><strong>Sipariş No:</strong> {siparis.siparisNo}</p>
             <p><strong>Müşteri:</strong> {siparis.musteri}</p>
             {siparis.cariUnvan && <p><strong>Cari Ünvan:</strong> {siparis.cariUnvan}</p>}
           </div>
@@ -84,6 +83,9 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
             <p><strong>Kombinasyon:</strong> {siparis.kombinasyonAdi}</p>
             {siparis.toplamMiktar > 0 && 
               <p><strong>Toplam Miktar:</strong> {siparis.toplamMiktar} m²</p>
+            }
+            {siparis.adet > 0 && 
+              <p><strong>Adet:</strong> {siparis.adet}</p>
             }
             <p><strong>Durum:</strong> {durum}</p>
           </div>

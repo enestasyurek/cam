@@ -54,28 +54,22 @@ export const FabrikaProvider = ({ children }) => {
   // Yeni sipariş oluşturma fonksiyonu
   const siparisOlustur = (siparisData) => {
     const {
-      siparisAdi,
       siparisNo,
       siparisTarihi,
       teslimTarihi,
       musteri,
       cariUnvan,
-      kombinasyonId,
+      kombinasyonMetni,
       toplamMiktar,
+      adet,
       oncelik,
       secilenIstasyonlar
     } = siparisData;
 
-    // Kombinasyon seçildiyse onun istasyonlarını kullan, yoksa manüel seçilen istasyonları kullan
-    let istasyonSirasi;
-    if (kombinasyonId) {
-      const seciliKombinasyon = kombinasyonlar.find(k => k.id === kombinasyonId);
-      istasyonSirasi = seciliKombinasyon ? seciliKombinasyon.istasyonlar : [];
-    } else {
-      istasyonSirasi = istasyonlar
-        .filter(istasyon => secilenIstasyonlar.includes(istasyon.id))
-        .map(istasyon => istasyon.id);
-    }
+    // İstasyon sırası seçilen istasyonlardan gelecek
+    const istasyonSirasi = istasyonlar
+      .filter(istasyon => secilenIstasyonlar.includes(istasyon.id))
+      .map(istasyon => istasyon.id);
 
     if (istasyonSirasi.length === 0) {
       alert('En az bir istasyon seçmelisiniz!');
@@ -84,18 +78,15 @@ export const FabrikaProvider = ({ children }) => {
 
     const yeniSiparis = {
       id: Date.now().toString(),
-      siparisAdi,
       siparisNo,
       siparisTarihi,
       teslimTarihi,
       gun: hesaplaGunSayisi(siparisTarihi, teslimTarihi),
       musteri,
       cariUnvan,
-      kombinasyonId,
-      kombinasyonAdi: kombinasyonId ? 
-        kombinasyonlar.find(k => k.id === kombinasyonId)?.name : 
-        'Özel Kombinasyon',
+      kombinasyonAdi: kombinasyonMetni || 'Belirtilmemiş',
       toplamMiktar: parseFloat(toplamMiktar) || 0,
+      adet: parseInt(adet) || 0,
       oncelik: parseInt(oncelik),
       olusturmaTarihi: new Date().toISOString(),
       istasyonSirasi,
@@ -229,6 +220,9 @@ export const FabrikaProvider = ({ children }) => {
         case 'toplamMiktar':
           karsilastirma = a.toplamMiktar - b.toplamMiktar;
           break;
+        case 'adet':
+          karsilastirma = a.adet - b.adet;
+          break;  
         case 'oncelik':
           karsilastirma = a.oncelik - b.oncelik;
           break;
