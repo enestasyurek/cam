@@ -59,13 +59,21 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
   
   return (
     <>
-      <div className={`siparis-kart ${durumSinifi}`}>
+      <div className={`siparis-kart ${durumSinifi} ${siparis.yedekSiparis ? 'yedek-siparis' : ''}`}>
         <div className="siparis-baslik">
           <div className="siparis-baslik-sol">
-            <h4>{siparis.siparisNo}</h4>
+            <h4>
+              {siparis.yedekSiparis && '🔄 '}
+              {siparis.siparisNo}
+            </h4>
             <span className={`oncelik-rozet oncelik-${siparis.oncelik}`}>
               {oncelikMetni}
             </span>
+            {siparis.yedekSiparis && (
+              <span className="yedek-rozet">
+                Yedek Sipariş
+              </span>
+            )}
           </div>
           
           {istasyonGorunumu && (

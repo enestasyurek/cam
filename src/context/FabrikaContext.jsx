@@ -34,7 +34,7 @@ export const FabrikaProvider = ({ children }) => {
   ]);
 
 
-  // Siparişler için veri - Demo sipariş ile başlat
+  // Siparişler için veri - Demo siparişler ile başlat
   const [siparisler, setSiparisler] = useState([
     {
       id: 'demo-1',
@@ -59,15 +59,40 @@ export const FabrikaProvider = ({ children }) => {
         { istasyonId: 'tesir-taslama-a1', baslamaSaati: null, bitisSaati: null },
         { istasyonId: 'cnc-cemil-a1', baslamaSaati: null, bitisSaati: null }
       ]
+    },
+    {
+      id: 'demo-2',
+      siparisNo: 'S-2024-002',
+      siparisTarihi: '2024-01-16',
+      teslimTarihi: '2024-01-30',
+      gun: 14,
+      musteri: 'Demo Müşteri B',
+      projeAdi: 'Örnek Proje',
+      camKombinasyonu: '4+12+4',
+      camTipi: 'Guardian Sun',
+      fabrika: 'A1',
+      toplamMiktar: 18.3,
+      adet: 8,
+      oncelik: 2,
+      olusturmaTarihi: new Date().toISOString(),
+      istasyonSirasi: ['intermac-kesim-a1', 'double-edger-a1', 'temper-244-a1'],
+      guncelIstasyonIndex: 1,
+      durum: 'İşlemde',
+      gecmis: [
+        { istasyonId: 'intermac-kesim-a1', baslamaSaati: new Date(Date.now() - 3600000).toISOString(), bitisSaati: new Date(Date.now() - 1800000).toISOString() },
+        { istasyonId: 'double-edger-a1', baslamaSaati: new Date(Date.now() - 1800000).toISOString(), bitisSaati: null },
+        { istasyonId: 'temper-244-a1', baslamaSaati: null, bitisSaati: null }
+      ]
     }
   ]);
 
   // Kırılan cam takibi için veri
   const [kirilanCamlar, setKirilanCamlar] = useState([]);
 
-  // İstasyon sıra beklemeleri (queue) için veri - Demo sipariş ile başlat
+  // İstasyon sıra beklemeleri (queue) için veri - Demo siparişler ile başlat
   const [istasyonKuyruklar, setIstasyonKuyruklar] = useState({
-    'intermac-kesim-a1': ['demo-1']
+    'intermac-kesim-a1': ['demo-1'],
+    'double-edger-a1': ['demo-2']
   });
 
   // Aktif görünüm için durum (Admin veya İstasyon)
@@ -241,31 +266,75 @@ export const FabrikaProvider = ({ children }) => {
 
   // Kırılan cam bildirme fonksiyonu
   const kirilanCamBildir = (istasyonId, siparisId, adet, aciklama) => {
+    const kirilanAdet = parseInt(adet);
+    
+    // Kırılan cam kaydını oluştur
     const yeniKirilanCam = {
       id: Date.now().toString(),
       istasyonId,
       siparisId,
-      adet: parseInt(adet),
+      adet: kirilanAdet,
       aciklama,
       tarih: new Date().toISOString()
     };
 
     setKirilanCamlar(onceki => [...onceki, yeniKirilanCam]);
 
-    // Siparişin kırılan adet bilgisini güncelle (toplam adeti azaltmadan)
+    // Orijinal siparişi bul
+    const orijinalSiparis = siparisler.find(s => s.id === siparisId);
+    if (!orijinalSiparis) {
+      toast.error('Sipariş bulunamadı!');
+      return;
+    }
+
+    // Yeni yedek sipariş oluştur
+    const yedekSiparisId = `${Date.now()}-yedek`;
+    const yedekSiparis = {
+      ...orijinalSiparis,
+      id: yedekSiparisId,
+      siparisNo: `${orijinalSiparis.siparisNo}-YDK`,
+      adet: kirilanAdet,
+      toplamMiktar: (orijinalSiparis.toplamMiktar / orijinalSiparis.adet) * kirilanAdet, // Birim miktar * yeni adet
+      kirilanAdet: 0, // Yeni sipariş kırık ile başlamaz
+      olusturmaTarihi: new Date().toISOString(),
+      guncelIstasyonIndex: 0, // İlk istasyondan başla
+      durum: 'Bekliyor',
+      gecmis: orijinalSiparis.istasyonSirasi.map(istasyonId => ({
+        istasyonId,
+        baslamaSaati: null,
+        bitisSaati: null
+      })),
+      yedekSiparis: true, // Yedek sipariş olduğunu belirt
+      orijinalSiparisId: siparisId // Hangi siparişin yedeği olduğunu belirt
+    };
+
+    // Siparişleri güncelle: orijinali güncelle ve yedek ekle
     setSiparisler(oncekiSiparisler => {
-      return oncekiSiparisler.map(siparis => {
+      const guncelSiparisler = oncekiSiparisler.map(siparis => {
         if (siparis.id === siparisId) {
           return {
             ...siparis,
-            kirilanAdet: (siparis.kirilanAdet || 0) + parseInt(adet)
+            kirilanAdet: (siparis.kirilanAdet || 0) + kirilanAdet
           };
         }
         return siparis;
       });
+      
+      // Yedek siparişi listeye ekle
+      return [...guncelSiparisler, yedekSiparis];
     });
+
+    // Yedek siparişi ilk istasyonun kuyruğuna ekle
+    if (orijinalSiparis.istasyonSirasi.length > 0) {
+      const ilkIstasyon = orijinalSiparis.istasyonSirasi[0];
+      setIstasyonKuyruklar(onceki => ({
+        ...onceki,
+        [ilkIstasyon]: [...(onceki[ilkIstasyon] || []), yedekSiparisId]
+      }));
+    }
     
-    toast.warning(`${adet} adet kırılan cam kaydedildi.`);
+    toast.warning(`${kirilanAdet} adet kırılan cam kaydedildi.`);
+    toast.success(`Yedek sipariş oluşturuldu: ${yedekSiparis.siparisNo}`);
   };
 
   // Sipariş arama fonksiyonu

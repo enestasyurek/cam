@@ -115,9 +115,34 @@ const KirilanCamModal = ({
                 {siparis.camKombinasyonu && (
                   <p><strong>Cam Kombinasyonu:</strong> {siparis.camKombinasyonu}</p>
                 )}
+                {siparis.kirilanAdet > 0 && (
+                  <p><strong>Önceki Kırıklar:</strong> <span className="kirmizi">{siparis.kirilanAdet} adet</span></p>
+                )}
               </div>
             </div>
           </div>
+
+          {formData.adet && parseInt(formData.adet) > 0 && (
+            <div className="bilgilendirme-mesaj">
+              <h4>🔄 Otomatik Yedek Sipariş</h4>
+              <p>
+                <strong>{formData.adet} adet</strong> kırık bildirimi yapıldığında, 
+                sistem otomatik olarak <strong>{siparis.siparisNo}-YDK</strong> numaralı 
+                yedek sipariş oluşturacak ve ilk istasyondan başlatacaktır.
+              </p>
+              <div className="yedek-detay">
+                <p>📦 <strong>Yedek Sipariş Detayları:</strong></p>
+                <ul>
+                  <li>Adet: {formData.adet}</li>
+                  <li>Miktar: {siparis.toplamMiktar && formData.adet ? 
+                    ((siparis.toplamMiktar / siparis.adet) * parseInt(formData.adet)).toFixed(2) 
+                    : '0'} m²</li>
+                  <li>Rota: Aynı istasyon sırası</li>
+                  <li>Durum: İlk istasyonda bekliyor</li>
+                </ul>
+              </div>
+            </div>
+          )}
 
           <div className="form-grup">
             <label htmlFor="pozNo">📍 Poz No</label>
