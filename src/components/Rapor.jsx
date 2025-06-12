@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { useFabrika } from '../context/FabrikaContext';
+import KirilanCamModal from './KirilanCamModal';
+import SiparisDuzenleModal from './SiparisDuzenleModal';
 
 const Rapor = () => {
   const { 
@@ -14,6 +16,12 @@ const Rapor = () => {
   
   const [aramaMetni, setAramaMetni] = useState('');
   const [sekmeler, setSekmeler] = useState('genel'); // genel, detay, istasyon, kirilan, kuyruk
+  const [modaller, setModaller] = useState({
+    kirilan: false,
+    duzenle: false,
+    secilenSiparis: null,
+    secilenIstasyon: null
+  });
 
   // Arama sonuçları
   const filtrelenmisiSiparisler = siparisAra(aramaMetni);
@@ -56,6 +64,25 @@ const Rapor = () => {
       siparisler.find(s => s.id === siparisId)
     ).filter(Boolean)
   }));
+
+  // Modal functions
+  const modalAc = (modalTip, siparis, istasyonId = null) => {
+    setModaller({
+      kirilan: modalTip === 'kirilan',
+      duzenle: modalTip === 'duzenle',
+      secilenSiparis: siparis,
+      secilenIstasyon: istasyonId
+    });
+  };
+
+  const modalKapat = () => {
+    setModaller({
+      kirilan: false,
+      duzenle: false,
+      secilenSiparis: null,
+      secilenIstasyon: null
+    });
+  };
 
   return (
     <div className="rapor-container">
@@ -265,6 +292,7 @@ const Rapor = () => {
                     <th>Durum</th>
                     <th>Güncel İstasyon</th>
                     <th>İlerleme</th>
+                    <th>İşlemler</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -302,6 +330,26 @@ const Rapor = () => {
                               style={{ width: `${ilerlemeYuzdesi}%` }}
                             />
                             <span className="ilerleme-metin">{ilerlemeYuzdesi}%</span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="tablo-butonlar">
+                            <button 
+                              className="btn btn-warning btn-sm"
+                              onClick={() => modalAc('duzenle', siparis)}
+                              title="Siparişi Düzenle"
+                            >
+                              ✏️
+                            </button>
+                            {guncelIstasyon && siparis.durum !== 'Tamamlandı' && (
+                              <button 
+                                className="btn btn-danger btn-sm"
+                                onClick={() => modalAc('kirilan', siparis, guncelIstasyon.id)}
+                                title="Kırılan Cam Bildir"
+                              >
+                                🔴
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -519,6 +567,24 @@ const Rapor = () => {
           </div>
         )}
       </div>
+
+      {/* Modal Components */}
+      {modaller.secilenSiparis && (
+        <>
+          <KirilanCamModal
+            isOpen={modaller.kirilan}
+            onClose={modalKapat}
+            siparis={modaller.secilenSiparis}
+            istasyonId={modaller.secilenIstasyon}
+          />
+          
+          <SiparisDuzenleModal
+            isOpen={modaller.duzenle}
+            onClose={modalKapat}
+            siparis={modaller.secilenSiparis}
+          />
+        </>
+      )}
     </div>
   );
 };
