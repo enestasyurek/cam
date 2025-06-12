@@ -217,7 +217,7 @@ const Rapor = () => {
                   <tbody>
                     {Object.entries(
                       siparisler.reduce((acc, siparis) => {
-                        const tip = siparis.kombinasyonAdi;
+                        const tip = siparis.camKombinasyonu || siparis.camTipi || 'Bilinmiyor';
                         if (!acc[tip]) {
                           acc[tip] = {
                             count: 0,
@@ -280,7 +280,7 @@ const Rapor = () => {
                       <tr key={siparis.id}>
                         <td>{siparis.siparisNo}</td>
                         <td>{siparis.musteri}</td>
-                        <td>{siparis.kombinasyonAdi}</td>
+                        <td>{siparis.camKombinasyonu || siparis.camTipi || 'Bilinmiyor'}</td>
                         <td>{siparis.fabrika || 'A1'}</td>
                         <td>
                           {siparis.adet}

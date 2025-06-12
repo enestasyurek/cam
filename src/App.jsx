@@ -53,14 +53,14 @@ function App() {
 
 // Separate component to use the context
 const AppContent = () => {
-  const { toast } = useFabrika();
+  const { toasts, removeToast } = useFabrika();
   
   return (
     <div className="app">
       <img src="/logo.jpg" alt="Efes Cam" className="app-logo" />
       <GorunumSecici />
       <IcerikGoruntule />
-      <ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} />
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
     </div>
   );
 };

@@ -59,9 +59,6 @@ export const FabrikaProvider = ({ children }) => {
       siparisTarihi,
       teslimTarihi,
       musteri,
-      cariUnvan,
-      kombinasyonMetni,
-      kombinasyonId,
       toplamMiktar,
       adet,
       oncelik,
@@ -84,9 +81,9 @@ export const FabrikaProvider = ({ children }) => {
       teslimTarihi,
       gun: hesaplaGunSayisi(siparisTarihi, teslimTarihi),
       musteri,
-      projeAdi,
-      camKombinasyonu,
-      camTipi,
+      projeAdi: siparisData.projeAdi || '',
+      camKombinasyonu: siparisData.camKombinasyonu || '',
+      camTipi: siparisData.camTipi || '',
       fabrika: fabrika || 'A1',
       toplamMiktar: parseFloat(toplamMiktar) || 0,
       adet: parseInt(adet) || 0,
@@ -347,7 +344,9 @@ export const FabrikaProvider = ({ children }) => {
     istasyonSiparisleriGetir,
     siralamaDegistir,
     siralaSiparisler,
-    toast
+    toast,
+    toasts: toast.toasts,
+    removeToast: toast.removeToast
   };
 
   return (

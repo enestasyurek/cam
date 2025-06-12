@@ -9,12 +9,12 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
   const [kirilanSebep, setKirilanSebep] = useState('');
   const [duzenleModalAcik, setDuzenleModalAcik] = useState(false);
   const [duzenleForm, setDuzenleForm] = useState({
-    musteri: siparis.musteri,
-    projeAdi: siparis.projeAdi,
-    camKombinasyonu: siparis.camKombinasyonu,
-    camTipi: siparis.camTipi,
-    toplamMiktar: siparis.toplamMiktar,
-    adet: siparis.adet
+    musteri: siparis.musteri || '',
+    projeAdi: siparis.projeAdi || '',
+    camKombinasyonu: siparis.camKombinasyonu || '',
+    camTipi: siparis.camTipi || '',
+    toplamMiktar: siparis.toplamMiktar || 0,
+    adet: siparis.adet || 0
   });
   
   const durum = siparis.durum;
@@ -75,7 +75,17 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
       return;
     }
     
-    siparisDuzenle(siparis.id, duzenleForm);
+    // Ensure all values are strings or numbers, not DOM elements
+    const temizForm = {
+      musteri: String(duzenleForm.musteri),
+      projeAdi: String(duzenleForm.projeAdi || ''),
+      camKombinasyonu: String(duzenleForm.camKombinasyonu || ''),
+      camTipi: String(duzenleForm.camTipi || ''),
+      toplamMiktar: parseFloat(duzenleForm.toplamMiktar) || 0,
+      adet: parseInt(duzenleForm.adet) || 0
+    };
+    
+    siparisDuzenle(siparis.id, temizForm);
     setDuzenleModalAcik(false);
     toast.success('Sipariş güncellendi!');
   };
@@ -150,7 +160,7 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
         <div className="detay-grup">
           <h5>Müşteri Bilgileri</h5>
           <p><strong>Müşteri:</strong> {siparis.musteri}</p>
-          {siparis.projeAdi && <p><strong>Proje:</strong> {siparis.projeAdi}</p>}
+          {siparis.projeAdi && <p><strong>Proje:</strong> {String(siparis.projeAdi)}</p>}
         </div>
         
         <div className="detay-grup">
@@ -162,8 +172,8 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
         
         <div className="detay-grup">
           <h5>Ürün Detayları</h5>
-          {siparis.camKombinasyonu && <p><strong>Cam Kombinasyonu:</strong> {siparis.camKombinasyonu}</p>}
-          {siparis.camTipi && <p><strong>Cam Tipi:</strong> {siparis.camTipi}</p>}
+          {siparis.camKombinasyonu && <p><strong>Cam Kombinasyonu:</strong> {String(siparis.camKombinasyonu)}</p>}
+          {siparis.camTipi && <p><strong>Cam Tipi:</strong> {String(siparis.camTipi)}</p>}
           {siparis.toplamMiktar > 0 && 
             <p><strong>Miktar:</strong> {siparis.toplamMiktar} m²</p>
           }

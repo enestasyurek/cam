@@ -97,7 +97,7 @@ const Dashboard = () => {
       ) : (
         <div className="istasyon-detay">
           <div className="istasyon-header">
-            <h2>{secilenFabrika} - {secilenIstasyonBilgisi.name}</h2>
+            <h2>{secilenFabrika} - {secilenIstasyonBilgisi?.name || 'İstasyon'}</h2>
           </div>
           <IstasyonGoruntule istasyonId={secilenIstasyon} />
           <div className="button-group">
