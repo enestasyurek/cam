@@ -5,7 +5,6 @@ import IstasyonGoruntule from './components/IstasyonGoruntule';
 import GorunumSecici from './components/GorunumSecici';
 import Rapor from './components/Rapor';
 import { ToastContainer } from './components/Toast';
-import logo from './assets/logo.jpg';
 import './App.css';
 
 // Ana içerik bileşeni
@@ -33,7 +32,7 @@ const IcerikGoruntule = () => {
     
     return (
       <div className="istasyon-icerik">
-        <img src={logo} alt="Efes Cam" className="dashboard-logo" />
+        <img src="/logo.jpg" alt="Efes Cam" className="dashboard-logo" />
         <h1>Cam Fabrikası Üretim Takip Sistemi</h1>
         <IstasyonGoruntule 
           istasyonId={istasyonId} 
@@ -58,7 +57,7 @@ const AppContent = () => {
   
   return (
     <div className="app">
-      <img src={logo} alt="Efes Cam" className="app-logo" />
+      <img src="/logo.jpg" alt="Efes Cam" className="app-logo" />
       <GorunumSecici />
       <IcerikGoruntule />
       <ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} />
