@@ -2,21 +2,22 @@ import { useState } from 'react';
 import { useFabrika } from '../context/FabrikaContext';
 
 const SiparisOlusturForm = () => {
-  const { istasyonlar, siparisOlustur } = useFabrika();
+  const { istasyonlar, kombinasyonlar, siparisOlustur } = useFabrika();
   
-  // Form alanları için state
   const [siparisNo, setSiparisNo] = useState('');
   const [siparisTarihi, setSiparisTarihi] = useState(new Date().toISOString().split('T')[0]);
   const [teslimTarihi, setTeslimTarihi] = useState('');
   const [musteri, setMusteri] = useState('');
   const [cariUnvan, setCariUnvan] = useState('');
   const [kombinasyonMetni, setKombinasyonMetni] = useState('');
+  const [kombinasyonId, setKombinasyonId] = useState('');
+  const [fabrika, setFabrika] = useState('A1');
   const [toplamMiktar, setToplamMiktar] = useState('');
   const [adet, setAdet] = useState('');
-  const [oncelik, setOncelik] = useState('2'); // Varsayılan orta öncelik
+  const [oncelik, setOncelik] = useState('2');
   const [secilenIstasyonlar, setSecilenIstasyonlar] = useState([]);
+  const [manuelSecim, setManuelSecim] = useState(false);
   
-  // Form gönderme işleyicisi
   const formGonder = (e) => {
     e.preventDefault();
     
@@ -40,44 +41,45 @@ const SiparisOlusturForm = () => {
       return;
     }
     
-    if (!kombinasyonMetni.trim()) {
-      alert('Lütfen cam kombinasyonunu girin!');
+    if (!kombinasyonId && !manuelSecim) {
+      alert('Lütfen bir cam tipi seçin veya manuel giriş yapın!');
       return;
     }
     
-    if (secilenIstasyonlar.length === 0) {
-      alert('Lütfen en az bir istasyon seçin!');
+    if (manuelSecim && secilenIstasyonlar.length === 0) {
+      alert('Manuel girişte en az bir istasyon seçmelisiniz!');
       return;
     }
     
-    // Sipariş oluştur
     siparisOlustur({
       siparisNo,
       siparisTarihi,
       teslimTarihi,
       musteri,
       cariUnvan,
-      kombinasyonMetni,
+      kombinasyonMetni: kombinasyonMetni || (kombinasyonId ? kombinasyonlar.find(k => k.id === kombinasyonId)?.name : ''),
+      kombinasyonId,
+      fabrika,
       toplamMiktar,
       adet,
       oncelik,
-      secilenIstasyonlar
+      secilenIstasyonlar: manuelSecim ? secilenIstasyonlar : []
     });
     
-    // Formu sıfırla
     setSiparisNo('');
     setSiparisTarihi(new Date().toISOString().split('T')[0]);
     setTeslimTarihi('');
     setMusteri('');
     setCariUnvan('');
     setKombinasyonMetni('');
+    setKombinasyonId('');
     setToplamMiktar('');
     setAdet('');
     setOncelik('2');
     setSecilenIstasyonlar([]);
+    setManuelSecim(false);
   };
   
-  // İstasyon seçimi işleyicisi
   const istasyonSecimDegistir = (istasyonId) => {
     setSecilenIstasyonlar(onceki => {
       if (onceki.includes(istasyonId)) {
@@ -88,12 +90,32 @@ const SiparisOlusturForm = () => {
     });
   };
   
+  const istasyonYukariTasi = (index) => {
+    if (index > 0) {
+      const yeniSira = [...secilenIstasyonlar];
+      [yeniSira[index - 1], yeniSira[index]] = [yeniSira[index], yeniSira[index - 1]];
+      setSecilenIstasyonlar(yeniSira);
+    }
+  };
+  
+  const istasyonAsagiTasi = (index) => {
+    if (index < secilenIstasyonlar.length - 1) {
+      const yeniSira = [...secilenIstasyonlar];
+      [yeniSira[index], yeniSira[index + 1]] = [yeniSira[index + 1], yeniSira[index]];
+      setSecilenIstasyonlar(yeniSira);
+    }
+  };
+  
+  const istasyonSil = (istasyonId) => {
+    setSecilenIstasyonlar(onceki => onceki.filter(id => id !== istasyonId));
+  };
+  
   return (
     <div className="siparis-olustur-form">
       <h2>Yeni Sipariş Oluştur</h2>
       <form onSubmit={formGonder}>
         <div className="form-grup">
-          <label htmlFor="siparisNo">Sipariş No:</label>
+          <label htmlFor="siparisNo">Sipariş No</label>
           <input
             type="text"
             id="siparisNo"
@@ -106,7 +128,7 @@ const SiparisOlusturForm = () => {
         
         <div className="form-row">
           <div className="form-grup">
-            <label htmlFor="siparisTarihi">Sipariş Tarihi:</label>
+            <label htmlFor="siparisTarihi">Sipariş Tarihi</label>
             <input
               type="date"
               id="siparisTarihi"
@@ -117,7 +139,7 @@ const SiparisOlusturForm = () => {
           </div>
           
           <div className="form-grup">
-            <label htmlFor="teslimTarihi">Teslim Tarihi:</label>
+            <label htmlFor="teslimTarihi">Teslim Tarihi</label>
             <input
               type="date"
               id="teslimTarihi"
@@ -130,7 +152,7 @@ const SiparisOlusturForm = () => {
         </div>
         
         <div className="form-grup">
-          <label htmlFor="musteri">Müşteri:</label>
+          <label htmlFor="musteri">Müşteri</label>
           <input
             type="text"
             id="musteri"
@@ -142,31 +164,74 @@ const SiparisOlusturForm = () => {
         </div>
         
         <div className="form-grup">
-          <label htmlFor="cariUnvan">Cari Ünvan:</label>
+          <label htmlFor="cariUnvan">Cari Ünvan</label>
           <input
             type="text"
             id="cariUnvan"
             value={cariUnvan}
             onChange={(e) => setCariUnvan(e.target.value)}
-            placeholder="Şirket Ünvanı"
+            placeholder="Şirket Ünvanı (Opsiyonel)"
           />
         </div>
         
         <div className="form-grup">
-          <label htmlFor="kombinasyon">Cam Kombinasyonu:</label>
-          <input
-            type="text"
-            id="kombinasyon"
-            value={kombinasyonMetni}
-            onChange={(e) => setKombinasyonMetni(e.target.value)}
-            placeholder="Örn: 6 mm Coolplus 62/44"
-            required
-          />
+          <label htmlFor="fabrika">Fabrika</label>
+          <select
+            id="fabrika"
+            value={fabrika}
+            onChange={(e) => setFabrika(e.target.value)}
+          >
+            <option value="A1">A1 Fabrikası</option>
+            <option value="B1">B1 Fabrikası</option>
+          </select>
         </div>
+        
+        <div className="form-grup">
+          <label htmlFor="kombinasyon">Cam Tipi</label>
+          <select
+            id="kombinasyon"
+            value={kombinasyonId}
+            onChange={(e) => {
+              setKombinasyonId(e.target.value);
+              setManuelSecim(e.target.value === 'manuel');
+            }}
+          >
+            <option value="">Seçiniz...</option>
+            <optgroup label={`${fabrika} Özel Tipler`}>
+              {kombinasyonlar
+                .filter(k => k.fabrika === fabrika)
+                .map(k => (
+                  <option key={k.id} value={k.id}>{k.name}</option>
+                ))}
+            </optgroup>
+            <optgroup label="Genel Tipler">
+              {kombinasyonlar
+                .filter(k => k.fabrika === 'GENEL')
+                .map(k => (
+                  <option key={k.id} value={k.id}>{k.name}</option>
+                ))}
+            </optgroup>
+            <option value="manuel">Manuel Giriş</option>
+          </select>
+        </div>
+        
+        {manuelSecim && (
+          <div className="form-grup">
+            <label htmlFor="kombinasyonMetni">Cam Açıklaması</label>
+            <input
+              type="text"
+              id="kombinasyonMetni"
+              value={kombinasyonMetni}
+              onChange={(e) => setKombinasyonMetni(e.target.value)}
+              placeholder="Örn: 6 mm Coolplus 62/44"
+              required={manuelSecim}
+            />
+          </div>
+        )}
         
         <div className="form-row">
           <div className="form-grup">
-            <label htmlFor="toplamMiktar">Toplam Miktar (m²):</label>
+            <label htmlFor="toplamMiktar">Toplam Miktar (m²)</label>
             <input
               type="number"
               id="toplamMiktar"
@@ -179,7 +244,7 @@ const SiparisOlusturForm = () => {
           </div>
           
           <div className="form-grup">
-            <label htmlFor="adet">Adet:</label>
+            <label htmlFor="adet">Adet</label>
             <input
               type="number"
               id="adet"
@@ -193,7 +258,7 @@ const SiparisOlusturForm = () => {
         </div>
         
         <div className="form-grup">
-          <label htmlFor="oncelik">Öncelik:</label>
+          <label htmlFor="oncelik">Öncelik</label>
           <select
             id="oncelik"
             value={oncelik}
@@ -205,26 +270,71 @@ const SiparisOlusturForm = () => {
           </select>
         </div>
         
-        <div className="form-grup">
-          <label>İstasyonlar:</label>
-          <div className="istasyon-secenekleri">
-            {istasyonlar.map(istasyon => (
-              <div key={istasyon.id} className="istasyon-secim">
-                <input
-                  type="checkbox"
-                  id={`istasyon-${istasyon.id}`}
-                  checked={secilenIstasyonlar.includes(istasyon.id)}
-                  onChange={() => istasyonSecimDegistir(istasyon.id)}
-                />
-                <label htmlFor={`istasyon-${istasyon.id}`}>
-                  {istasyon.name}
-                </label>
+        {manuelSecim && (
+          <>
+            <div className="form-grup">
+              <label>İstasyon Rotası (Manuel Seçim)</label>
+              <div className="istasyon-secenekleri">
+                {istasyonlar
+                  .filter(istasyon => istasyon.fabrika === fabrika)
+                  .map(istasyon => (
+                    <label key={istasyon.id} className="istasyon-secim">
+                      <input
+                        type="checkbox"
+                        checked={secilenIstasyonlar.includes(istasyon.id)}
+                        onChange={() => istasyonSecimDegistir(istasyon.id)}
+                      />
+                      <span>{istasyon.name}</span>
+                    </label>
+                  ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
+            
+            {secilenIstasyonlar.length > 0 && (
+              <div className="form-grup">
+                <label>İstasyon Sırası (Sürükle-Bırak ile düzenle)</label>
+                <div className="istasyon-sirasi">
+                  {secilenIstasyonlar.map((istasyonId, index) => {
+                    const istasyon = istasyonlar.find(i => i.id === istasyonId);
+                    return (
+                      <div key={istasyonId} className="istasyon-sira-item">
+                        <span className="sira-no">{index + 1}</span>
+                        <span className="istasyon-adi">{istasyon?.name}</span>
+                        <div className="sira-butonlar">
+                          <button
+                            type="button"
+                            className="sira-btn"
+                            onClick={() => istasyonYukariTasi(index)}
+                            disabled={index === 0}
+                          >
+                            ↑
+                          </button>
+                          <button
+                            type="button"
+                            className="sira-btn"
+                            onClick={() => istasyonAsagiTasi(index)}
+                            disabled={index === secilenIstasyonlar.length - 1}
+                          >
+                            ↓
+                          </button>
+                          <button
+                            type="button"
+                            className="sira-btn sil"
+                            onClick={() => istasyonSil(istasyonId)}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </>
+        )}
         
-        <button type="submit" className="olustur-button">
+        <button type="submit" className="btn btn-success btn-lg">
           Sipariş Oluştur
         </button>
       </form>
@@ -232,4 +342,4 @@ const SiparisOlusturForm = () => {
   );
 };
 
-export default SiparisOlusturForm; 
+export default SiparisOlusturForm;

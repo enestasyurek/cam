@@ -3,11 +3,17 @@ import Dashboard from './components/Dashboard';
 import SiparisOlusturForm from './components/SiparisOlusturForm';
 import IstasyonGoruntule from './components/IstasyonGoruntule';
 import GorunumSecici from './components/GorunumSecici';
+import Rapor from './components/Rapor';
 import './App.css';
 
 // Ana içerik bileşeni
 const IcerikGoruntule = () => {
   const { aktifGorunum } = useFabrika();
+  
+  // Rapor görünümü
+  if (aktifGorunum === 'rapor') {
+    return <Rapor />;
+  }
   
   // Eğer aktif görünüm "admin" ise, dashboard ve sipariş oluşturma formunu göster
   if (aktifGorunum === 'admin') {

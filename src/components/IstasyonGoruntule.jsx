@@ -4,13 +4,9 @@ import SiparisKarti from './SiparisKarti';
 const IstasyonGoruntule = ({ istasyonId, istasyonGorunumu = false }) => {
   const { istasyonlar, istasyonSiparisleriGetir, siralama, siralamaDegistir } = useFabrika();
   
-  // İstasyon bilgilerini al
   const istasyon = istasyonlar.find(i => i.id === istasyonId);
-  
-  // Bu istasyona ait siparişleri al
   const istasyonSiparisleri = istasyonSiparisleriGetir(istasyonId);
 
-  // Sıralama başlıklarını oluştur
   const siralamaBaşligi = (alan, metin) => {
     const aktif = siralama.alan === alan;
     const yonIcon = aktif ? (siralama.artan ? '↑' : '↓') : '';
@@ -27,25 +23,41 @@ const IstasyonGoruntule = ({ istasyonId, istasyonGorunumu = false }) => {
 
   return (
     <div className="istasyon-goruntule">
-      <h3>
-        {istasyonGorunumu ? 'Çalışma İstasyonu: ' : 'Siparişler: '}
-        {istasyon ? istasyon.name : ''}
-      </h3>
+      <div className="istasyon-header">
+        <h2>
+          {istasyonGorunumu ? 'Çalışma İstasyonu: ' : ''}
+          {istasyon ? istasyon.name : ''}
+        </h2>
+        {istasyonGorunumu && (
+          <div className="istasyon-ozet">
+            <span className="ozet-item">
+              <strong>Toplam:</strong> {istasyonSiparisleri.length}
+            </span>
+            <span className="ozet-item">
+              <strong>Bekleyen:</strong> {istasyonSiparisleri.filter(s => s.durum === 'Bekliyor').length}
+            </span>
+            <span className="ozet-item">
+              <strong>İşlemde:</strong> {istasyonSiparisleri.filter(s => s.durum === 'İşlemde').length}
+            </span>
+          </div>
+        )}
+      </div>
       
       {istasyonSiparisleri.length === 0 ? (
-        <p>Bu istasyonda bekleyen sipariş bulunmamaktadır.</p>
+        <div className="empty-state">
+          <h3>Sipariş Yok</h3>
+          <p>Bu istasyonda bekleyen sipariş bulunmamaktadır.</p>
+        </div>
       ) : (
-        <div className="istasyon-icerik">
+        <>
           <div className="siralama-basliklar">
             {siralamaBaşligi('siparisNo', 'Sipariş No')}
-            {siralamaBaşligi('siparisTarihi', 'Sipariş Tarihi')}
-            {siralamaBaşligi('teslimTarihi', 'Teslim Tarihi')}
+            {siralamaBaşligi('siparisTarihi', 'Sipariş')}
+            {siralamaBaşligi('teslimTarihi', 'Teslim')}
             {siralamaBaşligi('gun', 'Gün')}
             {siralamaBaşligi('musteri', 'Müşteri')}
-            {siralamaBaşligi('cariUnvan', 'Cari Ünvan')}
             {siralamaBaşligi('kombinasyonAdi', 'Kombinasyon')}
             {siralamaBaşligi('toplamMiktar', 'Miktar')}
-            {siralamaBaşligi('adet', 'Adet')}
             {siralamaBaşligi('oncelik', 'Öncelik')}
           </div>
           
@@ -59,10 +71,10 @@ const IstasyonGoruntule = ({ istasyonId, istasyonGorunumu = false }) => {
               />
             ))}
           </div>
-        </div>
+        </>
       )}
     </div>
   );
 };
 
-export default IstasyonGoruntule; 
+export default IstasyonGoruntule;

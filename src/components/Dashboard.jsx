@@ -3,88 +3,111 @@ import { useFabrika } from '../context/FabrikaContext';
 import IstasyonGoruntule from './IstasyonGoruntule';
 
 const Dashboard = () => {
-  const { istasyonlar, setAktifGorunum } = useFabrika();
+  const { 
+    istasyonlar, 
+    setAktifGorunum,
+    istasyonSiparisleriGetir,
+    istasyonKuyruklar 
+  } = useFabrika();
   
-  // Seçilen fabrika için durum
   const [secilenFabrika, setSecilenFabrika] = useState(null);
-  // Seçilen istasyon için durum
   const [secilenIstasyon, setSecilenIstasyon] = useState(null);
 
-  // Fabrika seçme işleyicisi
   const fabrikaSec = (fabrikaAdi) => {
     setSecilenFabrika(fabrikaAdi);
     setSecilenIstasyon(null);
   };
 
-  // İstasyon seçme işleyicisi
   const istasyonSec = (istasyonId) => {
     setSecilenIstasyon(istasyonId);
   };
 
-  // İstasyon görünümüne geçiş işleyicisi
   const istasyonGorunumuneGec = (istasyonId) => {
     setAktifGorunum(`istasyon-${istasyonId}`);
   };
 
-  // Seçilen istasyonun bilgilerini getir
   const secilenIstasyonBilgisi = istasyonlar.find(i => i.id === secilenIstasyon);
+
+  const bekleyenSiparislerByIstasyon = (istasyonId) => {
+    return istasyonSiparisleriGetir(istasyonId).length;
+  };
+
+  const kuyrukUzunlugu = (istasyonId) => {
+    return (istasyonKuyruklar[istasyonId] || []).length;
+  };
 
   return (
     <div className="dashboard">
       <h1>Cam Fabrikası Üretim Takip Sistemi</h1>
       
       {!secilenFabrika ? (
-        <div className="fabrikalar-container">
-          <h2>Fabrikalar</h2>
+        <div className="fabrika-secimi">
+          <h2>Fabrika Seçimi</h2>
           <div className="fabrika-kartlari">
             <div 
               className="fabrika-kart" 
               onClick={() => fabrikaSec('A1')}
             >
               <h3>A1 Fabrikası</h3>
+              <p>Ana Üretim Tesisi</p>
             </div>
             <div 
               className="fabrika-kart" 
               onClick={() => fabrikaSec('B1')}
             >
               <h3>B1 Fabrikası</h3>
+              <p>Yan Üretim Tesisi</p>
             </div>
           </div>
         </div>
       ) : !secilenIstasyon ? (
-        <div className="istasyonlar-container">
+        <div className="istasyon-secimi">
           <h2>{secilenFabrika} Fabrikası İstasyonları</h2>
           <div className="istasyon-kartlari">
-            {istasyonlar.map(istasyon => (
-              <div 
-                key={istasyon.id} 
-                className="istasyon-kart" 
-                onClick={() => istasyonSec(istasyon.id)}
-              >
-                <h3>{istasyon.name}</h3>
-              </div>
-            ))}
+            {istasyonlar
+              .filter(istasyon => istasyon.fabrika === secilenFabrika)
+              .map(istasyon => {
+                const bekleyenSayisi = bekleyenSiparislerByIstasyon(istasyon.id);
+                const kuyrukSayisi = kuyrukUzunlugu(istasyon.id);
+                return (
+                  <div 
+                    key={istasyon.id} 
+                    className="istasyon-kart" 
+                    onClick={() => istasyonSec(istasyon.id)}
+                  >
+                    <h4>{istasyon.name}</h4>
+                    <p>{bekleyenSayisi} aktif sipariş</p>
+                    {kuyrukSayisi > 0 && (
+                      <span className="bekleyen-badge">{kuyrukSayisi} kuyrukta</span>
+                    )}
+                  </div>
+                );
+              })}
           </div>
-          <button 
-            className="geri-button" 
-            onClick={() => setSecilenFabrika(null)}
-          >
-            Geri
-          </button>
+          <div className="button-group">
+            <button 
+              className="btn btn-secondary" 
+              onClick={() => setSecilenFabrika(null)}
+            >
+              Geri
+            </button>
+          </div>
         </div>
       ) : (
         <div className="istasyon-detay">
-          <h2>{secilenFabrika} Fabrikası - {secilenIstasyonBilgisi.name}</h2>
+          <div className="istasyon-header">
+            <h2>{secilenFabrika} - {secilenIstasyonBilgisi.name}</h2>
+          </div>
           <IstasyonGoruntule istasyonId={secilenIstasyon} />
           <div className="button-group">
             <button 
-              className="geri-button" 
+              className="btn btn-secondary" 
               onClick={() => setSecilenIstasyon(null)}
             >
               Geri
             </button>
             <button 
-              className="goruntule-button" 
+              className="btn btn-primary" 
               onClick={() => istasyonGorunumuneGec(secilenIstasyon)}
             >
               İstasyon Görünümüne Geç
@@ -96,4 +119,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;
