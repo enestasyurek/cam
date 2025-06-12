@@ -34,14 +34,41 @@ export const FabrikaProvider = ({ children }) => {
   ]);
 
 
-  // Siparişler için veri
-  const [siparisler, setSiparisler] = useState([]);
+  // Siparişler için veri - Demo sipariş ile başlat
+  const [siparisler, setSiparisler] = useState([
+    {
+      id: 'demo-1',
+      siparisNo: 'S-2024-001',
+      siparisTarihi: '2024-01-15',
+      teslimTarihi: '2024-01-25',
+      gun: 10,
+      musteri: 'Demo Müşteri A',
+      projeAdi: 'Test Projesi',
+      camKombinasyonu: '6+16+6',
+      camTipi: 'Coolplus 62/44',
+      fabrika: 'A1',
+      toplamMiktar: 25.5,
+      adet: 12,
+      oncelik: 1,
+      olusturmaTarihi: new Date().toISOString(),
+      istasyonSirasi: ['intermac-kesim-a1', 'tesir-taslama-a1', 'cnc-cemil-a1'],
+      guncelIstasyonIndex: 0,
+      durum: 'Bekliyor',
+      gecmis: [
+        { istasyonId: 'intermac-kesim-a1', baslamaSaati: null, bitisSaati: null },
+        { istasyonId: 'tesir-taslama-a1', baslamaSaati: null, bitisSaati: null },
+        { istasyonId: 'cnc-cemil-a1', baslamaSaati: null, bitisSaati: null }
+      ]
+    }
+  ]);
 
   // Kırılan cam takibi için veri
   const [kirilanCamlar, setKirilanCamlar] = useState([]);
 
-  // İstasyon sıra beklemeleri (queue) için veri
-  const [istasyonKuyruklar, setIstasyonKuyruklar] = useState({});
+  // İstasyon sıra beklemeleri (queue) için veri - Demo sipariş ile başlat
+  const [istasyonKuyruklar, setIstasyonKuyruklar] = useState({
+    'intermac-kesim-a1': ['demo-1']
+  });
 
   // Aktif görünüm için durum (Admin veya İstasyon)
   const [aktifGorunum, setAktifGorunum] = useState('admin');

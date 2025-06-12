@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFabrika } from '../context/FabrikaContext';
 
 const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
   const { iseBasla, isiBitir, aktifGorunum, istasyonlar, kirilanCamBildir, siparisDuzenle, toast } = useFabrika();
-  const [kirilanModalAcik, setKirilanModalAcik] = useState(false);
+  const [modaller, setModaller] = useState({
+    kirilan: false,
+    duzenle: false
+  });
   const [kirilanPozNo, setKirilanPozNo] = useState('');
   const [kirilanAdet, setKirilanAdet] = useState('');
   const [kirilanSebep, setKirilanSebep] = useState('');
-  const [duzenleModalAcik, setDuzenleModalAcik] = useState(false);
   const [duzenleForm, setDuzenleForm] = useState({
     musteri: siparis.musteri || '',
     projeAdi: siparis.projeAdi || '',
@@ -36,6 +38,43 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
     isiBitir(siparis.id);
   };
   
+  // Keyboard event handling for modals
+  useEffect(() => {
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        if (modaller.kirilan) {
+          modalKapat('kirilan');
+        } else if (modaller.duzenle) {
+          modalKapat('duzenle');
+        }
+      }
+    };
+
+    if (modaller.kirilan || modaller.duzenle) {
+      document.addEventListener('keydown', handleEscape);
+      // Prevent background scroll
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [modaller]);
+
+  const modalAc = (modalTip) => {
+    setModaller(prev => ({ ...prev, [modalTip]: true }));
+  };
+
+  const modalKapat = (modalTip) => {
+    setModaller(prev => ({ ...prev, [modalTip]: false }));
+    if (modalTip === 'kirilan') {
+      setKirilanPozNo('');
+      setKirilanAdet('');
+      setKirilanSebep('');
+    }
+  };
+
   const kirilanCamKaydet = () => {
     if (!kirilanPozNo.trim()) {
       toast.error('Lütfen poz numarası giriniz!');
@@ -58,10 +97,8 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
     }
     
     kirilanCamBildir(istasyonId, siparis.id, kirilanAdet, `Poz: ${kirilanPozNo} - ${kirilanSebep}`);
-    setKirilanModalAcik(false);
-    setKirilanPozNo('');
-    setKirilanAdet('');
-    setKirilanSebep('');
+    modalKapat('kirilan');
+    toast.success('Kırılan cam kaydedildi!');
   };
   
   const siparisDuzenleKaydet = () => {
@@ -86,7 +123,7 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
     };
     
     siparisDuzenle(siparis.id, temizForm);
-    setDuzenleModalAcik(false);
+    modalKapat('duzenle');
     toast.success('Sipariş güncellendi!');
   };
   
@@ -135,7 +172,7 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
               İşi Bitir
             </button>
             <button 
-              onClick={() => setKirilanModalAcik(true)}
+              onClick={() => modalAc('kirilan')}
               className="btn btn-danger btn-sm"
               title="Kırılan Cam Bildir"
             >
@@ -146,7 +183,7 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
         {!istasyonGorunumu && aktifGorunum === 'admin' && (
           <div className="siparis-butonlar">
             <button 
-              onClick={() => setDuzenleModalAcik(true)}
+              onClick={() => modalAc('duzenle')}
               className="btn btn-warning btn-sm"
               title="Siparişi Düzenle"
             >
@@ -191,108 +228,178 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
       </div>
       
       {/* Kırılan Cam Modal */}
-      {kirilanModalAcik && (
-        <div className="modal-overlay modal-fullscreen" onClick={() => setKirilanModalAcik(false)}>
+      {modaller.kirilan && (
+        <div className="modal-overlay modal-fullscreen" onClick={() => modalKapat('kirilan')}>
           <div className="modal-content modal-content-fullscreen" onClick={(e) => e.stopPropagation()}>
-            <h3>Kırılan Cam Bildir</h3>
-            <div className="form-grup">
-              <label>Poz No</label>
-              <input
-                type="text"
-                value={kirilanPozNo}
-                onChange={(e) => setKirilanPozNo(e.target.value)}
-                placeholder="Poz numarasını giriniz"
-                autoFocus
-              />
+            <div className="modal-header">
+              <h3>🔴 Kırılan Cam Bildir</h3>
+              <button 
+                className="modal-close" 
+                onClick={() => modalKapat('kirilan')}
+                aria-label="Modalı Kapat"
+              >
+                ×
+              </button>
             </div>
-            <div className="form-grup">
-              <label>Adet</label>
-              <input
-                type="number"
-                value={kirilanAdet}
-                onChange={(e) => setKirilanAdet(e.target.value)}
-                min="1"
-                max={siparis.adet}
-                placeholder="Kırılan adet"
-              />
+            
+            <div className="modal-body">
+              <div className="form-grup">
+                <label htmlFor="pozNo">Poz No</label>
+                <input
+                  id="pozNo"
+                  type="text"
+                  value={kirilanPozNo}
+                  onChange={(e) => setKirilanPozNo(e.target.value)}
+                  placeholder="Poz numarasını giriniz"
+                  autoFocus
+                />
+              </div>
+              
+              <div className="form-grup">
+                <label htmlFor="kirilanAdet">Adet</label>
+                <input
+                  id="kirilanAdet"
+                  type="number"
+                  value={kirilanAdet}
+                  onChange={(e) => setKirilanAdet(e.target.value)}
+                  min="1"
+                  max={siparis.adet}
+                  placeholder="Kırılan adet"
+                />
+                <small className="form-text">Maksimum: {siparis.adet} adet</small>
+              </div>
+              
+              <div className="form-grup">
+                <label htmlFor="kirilanSebep">Sebep</label>
+                <textarea
+                  id="kirilanSebep"
+                  value={kirilanSebep}
+                  onChange={(e) => setKirilanSebep(e.target.value)}
+                  placeholder="Kırılma sebebini açıklayınız..."
+                  rows="4"
+                />
+              </div>
             </div>
-            <div className="form-grup">
-              <label>Sebep</label>
-              <textarea
-                value={kirilanSebep}
-                onChange={(e) => setKirilanSebep(e.target.value)}
-                placeholder="Kırılma sebebini açıklayınız..."
-                rows="4"
-              />
-            </div>
+            
             <div className="modal-buttons">
-              <button className="btn btn-secondary btn-lg" onClick={() => setKirilanModalAcik(false)}>İptal</button>
-              <button className="btn btn-danger btn-lg" onClick={kirilanCamKaydet}>Kaydet</button>
+              <button 
+                className="btn btn-secondary btn-lg" 
+                onClick={() => modalKapat('kirilan')}
+              >
+                İptal
+              </button>
+              <button 
+                className="btn btn-danger btn-lg" 
+                onClick={kirilanCamKaydet}
+                disabled={!kirilanPozNo.trim() || !kirilanAdet || !kirilanSebep.trim()}
+              >
+                Kaydet
+              </button>
             </div>
           </div>
         </div>
       )}
       
       {/* Düzenleme Modal */}
-      {duzenleModalAcik && (
-        <div className="modal-overlay modal-fullscreen" onClick={() => setDuzenleModalAcik(false)}>
+      {modaller.duzenle && (
+        <div className="modal-overlay modal-fullscreen" onClick={() => modalKapat('duzenle')}>
           <div className="modal-content modal-content-fullscreen" onClick={(e) => e.stopPropagation()}>
-            <h3>Siparişi Düzenle</h3>
-            <div className="form-grup">
-              <label>Müşteri</label>
-              <input
-                type="text"
-                value={duzenleForm.musteri}
-                onChange={(e) => setDuzenleForm({...duzenleForm, musteri: e.target.value})}
-              />
+            <div className="modal-header">
+              <h3>✏️ Siparişi Düzenle</h3>
+              <button 
+                className="modal-close" 
+                onClick={() => modalKapat('duzenle')}
+                aria-label="Modalı Kapat"
+              >
+                ×
+              </button>
             </div>
-            <div className="form-grup">
-              <label>Proje</label>
-              <input
-                type="text"
-                value={duzenleForm.projeAdi || ''}
-                onChange={(e) => setDuzenleForm({...duzenleForm, projeAdi: e.target.value})}
-                placeholder="Proje Adı"
-              />
+            
+            <div className="modal-body">
+              <div className="form-grup">
+                <label htmlFor="musteri">Müşteri</label>
+                <input
+                  id="musteri"
+                  type="text"
+                  value={duzenleForm.musteri}
+                  onChange={(e) => setDuzenleForm({...duzenleForm, musteri: e.target.value})}
+                  placeholder="Müşteri Adı"
+                />
+              </div>
+              
+              <div className="form-grup">
+                <label htmlFor="projeAdi">Proje</label>
+                <input
+                  id="projeAdi"
+                  type="text"
+                  value={duzenleForm.projeAdi || ''}
+                  onChange={(e) => setDuzenleForm({...duzenleForm, projeAdi: e.target.value})}
+                  placeholder="Proje Adı (Opsiyonel)"
+                />
+              </div>
+              
+              <div className="form-grup">
+                <label htmlFor="camKombinasyonu">Cam Kombinasyonu</label>
+                <input
+                  id="camKombinasyonu"
+                  type="text"
+                  value={duzenleForm.camKombinasyonu || ''}
+                  onChange={(e) => setDuzenleForm({...duzenleForm, camKombinasyonu: e.target.value})}
+                  placeholder="Örn: 6+16+6"
+                />
+              </div>
+              
+              <div className="form-grup">
+                <label htmlFor="camTipi">Cam Tipi</label>
+                <input
+                  id="camTipi"
+                  type="text"
+                  value={duzenleForm.camTipi || ''}
+                  onChange={(e) => setDuzenleForm({...duzenleForm, camTipi: e.target.value})}
+                  placeholder="Örn: Coolplus 62/44"
+                />
+              </div>
+              
+              <div className="form-row">
+                <div className="form-grup">
+                  <label htmlFor="toplamMiktar">Miktar (m²)</label>
+                  <input
+                    id="toplamMiktar"
+                    type="number"
+                    value={duzenleForm.toplamMiktar}
+                    onChange={(e) => setDuzenleForm({...duzenleForm, toplamMiktar: e.target.value})}
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+                
+                <div className="form-grup">
+                  <label htmlFor="adet">Adet</label>
+                  <input
+                    id="adet"
+                    type="number"
+                    value={duzenleForm.adet}
+                    onChange={(e) => setDuzenleForm({...duzenleForm, adet: e.target.value})}
+                    min="1"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="form-grup">
-              <label>Cam Kombinasyonu</label>
-              <input
-                type="text"
-                value={duzenleForm.camKombinasyonu || ''}
-                onChange={(e) => setDuzenleForm({...duzenleForm, camKombinasyonu: e.target.value})}
-                placeholder="Örn: 6+16+6"
-              />
-            </div>
-            <div className="form-grup">
-              <label>Cam Tipi</label>
-              <input
-                type="text"
-                value={duzenleForm.camTipi || ''}
-                onChange={(e) => setDuzenleForm({...duzenleForm, camTipi: e.target.value})}
-                placeholder="Örn: Coolplus 62/44"
-              />
-            </div>
-            <div className="form-grup">
-              <label>Miktar (m²)</label>
-              <input
-                type="number"
-                value={duzenleForm.toplamMiktar}
-                onChange={(e) => setDuzenleForm({...duzenleForm, toplamMiktar: e.target.value})}
-                step="0.01"
-              />
-            </div>
-            <div className="form-grup">
-              <label>Adet</label>
-              <input
-                type="number"
-                value={duzenleForm.adet}
-                onChange={(e) => setDuzenleForm({...duzenleForm, adet: e.target.value})}
-              />
-            </div>
+            
             <div className="modal-buttons">
-              <button className="btn btn-secondary btn-lg" onClick={() => setDuzenleModalAcik(false)}>İptal</button>
-              <button className="btn btn-primary btn-lg" onClick={siparisDuzenleKaydet}>Kaydet</button>
+              <button 
+                className="btn btn-secondary btn-lg" 
+                onClick={() => modalKapat('duzenle')}
+              >
+                İptal
+              </button>
+              <button 
+                className="btn btn-primary btn-lg" 
+                onClick={siparisDuzenleKaydet}
+                disabled={!duzenleForm.musteri.trim()}
+              >
+                Kaydet
+              </button>
             </div>
           </div>
         </div>
