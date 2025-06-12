@@ -7,6 +7,16 @@ const IstasyonGoruntule = ({ istasyonId, istasyonGorunumu = false }) => {
   
   const istasyon = istasyonlar.find(i => i.id === istasyonId);
   const istasyonSiparisleri = istasyonSiparisleriGetir(istasyonId);
+  
+  if (!istasyon) {
+    return (
+      <div className="empty-state">
+        <h3>İstasyon Bulunamadı</h3>
+        <p>İstasyon ID: {istasyonId}</p>
+        <p>Lütfen geçerli bir istasyon seçin.</p>
+      </div>
+    );
+  }
 
   const siralamaBaşligi = (alan, metin) => {
     const aktif = siralama.alan === alan;

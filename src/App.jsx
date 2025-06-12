@@ -33,6 +33,7 @@ const IcerikGoruntule = () => {
     
     return (
       <div className="istasyon-icerik">
+        <img src={logo} alt="Efes Cam" className="dashboard-logo" />
         <h1>Cam Fabrikası Üretim Takip Sistemi</h1>
         <IstasyonGoruntule 
           istasyonId={istasyonId} 
