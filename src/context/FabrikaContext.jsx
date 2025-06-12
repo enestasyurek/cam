@@ -10,79 +10,29 @@ export const FabrikaProvider = ({ children }) => {
   // İstasyonlar için veri - A1 ve B1 için ayrı istasyonlar
   const [istasyonlar] = useState([
     // A1 Fabrikası İstasyonları
-    { id: 'kesim-a1', name: 'Intermac Kesim (A1)', fabrika: 'A1', tip: 'kesim' },
-    { id: 'rodaj-a1', name: 'Rodaj (A1)', fabrika: 'A1', tip: 'rodaj' },
-    { id: 'temper-a1', name: 'Temper (A1)', fabrika: 'A1', tip: 'temper' },
-    { id: 'isicam-a1', name: 'Isıcam (A1)', fabrika: 'A1', tip: 'isicam' },
-    { id: 'lamine-a1', name: 'Lamine (A1)', fabrika: 'A1', tip: 'lamine' },
-    { id: 'montaj-a1', name: 'Montaj (A1)', fabrika: 'A1', tip: 'montaj' },
+    { id: 'intermac-kesim-a1', name: 'Intermac Kesim', fabrika: 'A1', tip: 'kesim' },
+    { id: 'tesir-taslama-a1', name: 'Tesir Taşlama', fabrika: 'A1', tip: 'taslama' },
+    { id: 'double-edger-a1', name: 'Double Edger', fabrika: 'A1', tip: 'edger' },
+    { id: 'cnc-cemil-a1', name: 'CNC (Cemil)', fabrika: 'A1', tip: 'cnc' },
+    { id: 'cnc-abdullah-a1', name: 'CNC (Abdullah)', fabrika: 'A1', tip: 'cnc' },
+    { id: 'boya-ipek-a1', name: 'Boya (İpek-Roller)', fabrika: 'A1', tip: 'boya' },
+    { id: 'delik-a1', name: 'Delik', fabrika: 'A1', tip: 'delik' },
+    { id: 'temper-244-a1', name: 'Temper (244x420)', fabrika: 'A1', tip: 'temper' },
+    { id: 'on-laminasyon-a1', name: 'Ön Laminasyon', fabrika: 'A1', tip: 'laminasyon' },
+    { id: 'yukleme-erol-a1', name: 'Yükleme (Erol)', fabrika: 'A1', tip: 'yukleme' },
     
     // B1 Fabrikası İstasyonları
-    { id: 'kesim-b1', name: 'Intermac Kesim (B1)', fabrika: 'B1', tip: 'kesim' },
-    { id: 'rodaj-b1', name: 'Rodaj (B1)', fabrika: 'B1', tip: 'rodaj' },
-    { id: 'temper-b1', name: 'Temper (B1)', fabrika: 'B1', tip: 'temper' },
-    { id: 'isicam-b1', name: 'Isıcam (B1)', fabrika: 'B1', tip: 'isicam' },
-    { id: 'lamine-b1', name: 'Lamine (B1)', fabrika: 'B1', tip: 'lamine' },
-    { id: 'montaj-b1', name: 'Montaj (B1)', fabrika: 'B1', tip: 'montaj' }
+    { id: 'liva-kesim-b1', name: 'Liva Kesim', fabrika: 'B1', tip: 'kesim' },
+    { id: 'lamine-kesim-b1', name: 'Lamine Kesim', fabrika: 'B1', tip: 'kesim' },
+    { id: 'tesir-taslama-1-b1', name: 'Tesir Taşlama 1', fabrika: 'B1', tip: 'taslama' },
+    { id: 'tesir-taslama-2-b1', name: 'Tesir Taşlama 2', fabrika: 'B1', tip: 'taslama' },
+    { id: 'tesir-dik-cnc-b1', name: 'Tesir Dik CNC', fabrika: 'B1', tip: 'cnc' },
+    { id: 'temper-280-b1', name: 'Temper (280x600)', fabrika: 'B1', tip: 'temper' },
+    { id: 'isicam-b1', name: 'Isıcam', fabrika: 'B1', tip: 'isicam' },
+    { id: 'heat-soak-b1', name: 'Heat Soak', fabrika: 'B1', tip: 'heat-soak' },
+    { id: 'yukleme-b1', name: 'Yükleme', fabrika: 'B1', tip: 'yukleme' }
   ]);
 
-  // Kombinasyonlar için veri (cam türleri ve izleyecekleri süreçler)
-  // A1 ve B1 özel cam tipleri
-  const [kombinasyonlar] = useState([
-    // A1 Fabrikası için özel cam tipleri
-    { 
-      id: 'a1-ozel-tip1', 
-      name: 'A1 Özel Cam Tip 1',
-      fabrika: 'A1',
-      istasyonlar: ['kesim', 'rodaj', 'temper', 'isicam']
-    },
-    { 
-      id: 'a1-ozel-tip2', 
-      name: 'A1 Özel Cam Tip 2',
-      fabrika: 'A1',
-      istasyonlar: ['kesim', 'rodaj', 'lamine']
-    },
-    
-    // B1 Fabrikası için özel cam tipleri
-    { 
-      id: 'b1-ozel-tip1', 
-      name: 'B1 Özel Cam Tip 1',
-      fabrika: 'B1',
-      istasyonlar: ['kesim', 'rodaj', 'temper']
-    },
-    { 
-      id: 'b1-ozel-tip2', 
-      name: 'B1 Özel Cam Tip 2',
-      fabrika: 'B1',
-      istasyonlar: ['kesim', 'isicam', 'montaj']
-    },
-    
-    // Genel cam tipleri (her iki fabrikada da üretilebilir)
-    { 
-      id: '6mm-coolplus-62-44', 
-      name: '6 mm Coolplus 62/44',
-      fabrika: 'GENEL',
-      istasyonlar: ['kesim', 'rodaj', 'temper', 'isicam']
-    },
-    { 
-      id: '8mm-lamine', 
-      name: '8 mm Lamine',
-      fabrika: 'GENEL',
-      istasyonlar: ['kesim', 'rodaj', 'lamine']
-    },
-    { 
-      id: '10mm-temperli', 
-      name: '10 mm Temperli',
-      fabrika: 'GENEL',
-      istasyonlar: ['kesim', 'rodaj', 'temper']
-    },
-    { 
-      id: '4mm-duz', 
-      name: '4 mm Düz Cam',
-      fabrika: 'GENEL',
-      istasyonlar: ['kesim', 'isicam']
-    }
-  ]);
 
   // Siparişler için veri
   const [siparisler, setSiparisler] = useState([]);
@@ -119,29 +69,11 @@ export const FabrikaProvider = ({ children }) => {
       fabrika
     } = siparisData;
 
-    let istasyonSirasi = [];
-    
-    // Eğer kombinasyon seçildiyse, otomatik istasyon ataması yap
-    if (kombinasyonId) {
-      const kombinasyon = kombinasyonlar.find(k => k.id === kombinasyonId);
-      if (kombinasyon) {
-        const hedefFabrika = kombinasyon.fabrika === 'GENEL' ? fabrika : kombinasyon.fabrika;
-        
-        // Kombinasyondaki istasyon tiplerini fabrika-özel istasyonlara çevir
-        istasyonSirasi = kombinasyon.istasyonlar.map(istasyonTipi => {
-          const istasyon = istasyonlar.find(i => i.tip === istasyonTipi && i.fabrika === hedefFabrika);
-          return istasyon ? istasyon.id : null;
-        }).filter(id => id !== null);
-      }
-    } else if (secilenIstasyonlar && secilenIstasyonlar.length > 0) {
-      // Manuel istasyon seçimi
-      istasyonSirasi = istasyonlar
-        .filter(istasyon => secilenIstasyonlar.includes(istasyon.id))
-        .map(istasyon => istasyon.id);
-    }
+    // Manuel istasyon seçimi - sıralı şekilde gelir
+    let istasyonSirasi = secilenIstasyonlar || [];
 
     if (istasyonSirasi.length === 0) {
-      toast.error('En az bir istasyon seçmelisiniz veya bir kombinasyon belirtmelisiniz!');
+      toast.error('En az bir istasyon seçmelisiniz!');
       return;
     }
 
@@ -154,7 +86,6 @@ export const FabrikaProvider = ({ children }) => {
       musteri,
       cariUnvan,
       kombinasyonAdi: kombinasyonMetni || 'Belirtilmemiş',
-      kombinasyonId: kombinasyonId || null,
       fabrika: fabrika || 'A1',
       toplamMiktar: parseFloat(toplamMiktar) || 0,
       adet: parseInt(adet) || 0,
@@ -296,13 +227,12 @@ export const FabrikaProvider = ({ children }) => {
 
     setKirilanCamlar(onceki => [...onceki, yeniKirilanCam]);
 
-    // Siparişin adetini güncelle
+    // Siparişin kırılan adet bilgisini güncelle (toplam adeti azaltmadan)
     setSiparisler(oncekiSiparisler => {
       return oncekiSiparisler.map(siparis => {
         if (siparis.id === siparisId) {
           return {
             ...siparis,
-            adet: siparis.adet - parseInt(adet),
             kirilanAdet: (siparis.kirilanAdet || 0) + parseInt(adet)
           };
         }
@@ -401,7 +331,6 @@ export const FabrikaProvider = ({ children }) => {
   // Tüm fabrika verilerini ve fonksiyonlarını değer olarak sağla
   const value = {
     istasyonlar,
-    kombinasyonlar,
     siparisler,
     kirilanCamlar,
     istasyonKuyruklar,

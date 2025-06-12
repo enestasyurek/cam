@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useFabrika } from '../context/FabrikaContext';
 
 const SiparisOlusturForm = () => {
-  const { istasyonlar, kombinasyonlar, siparisOlustur, toast } = useFabrika();
+  const { istasyonlar, siparisOlustur, toast } = useFabrika();
   
   const [siparisNo, setSiparisNo] = useState('');
   const [siparisTarihi, setSiparisTarihi] = useState(new Date().toISOString().split('T')[0]);
@@ -10,13 +10,11 @@ const SiparisOlusturForm = () => {
   const [musteri, setMusteri] = useState('');
   const [cariUnvan, setCariUnvan] = useState('');
   const [kombinasyonMetni, setKombinasyonMetni] = useState('');
-  const [kombinasyonId, setKombinasyonId] = useState('');
   const [fabrika, setFabrika] = useState('A1');
   const [toplamMiktar, setToplamMiktar] = useState('');
   const [adet, setAdet] = useState('');
   const [oncelik, setOncelik] = useState('2');
   const [secilenIstasyonlar, setSecilenIstasyonlar] = useState([]);
-  const [manuelSecim, setManuelSecim] = useState(false);
   
   const formGonder = (e) => {
     e.preventDefault();
@@ -44,12 +42,12 @@ const SiparisOlusturForm = () => {
       errors.push('Müşteri adı zorunludur');
     }
     
-    if (!kombinasyonId && !manuelSecim) {
-      errors.push('Cam tipi seçimi zorunludur');
+    if (!kombinasyonMetni.trim()) {
+      errors.push('Cam tipi açıklaması zorunludur');
     }
     
-    if (manuelSecim && secilenIstasyonlar.length === 0) {
-      errors.push('Manuel girişte en az bir istasyon seçmelisiniz');
+    if (secilenIstasyonlar.length === 0) {
+      errors.push('En az bir istasyon seçmelisiniz');
     }
     
     if (!adet || parseInt(adet) <= 0) {
@@ -67,13 +65,13 @@ const SiparisOlusturForm = () => {
       teslimTarihi,
       musteri,
       cariUnvan,
-      kombinasyonMetni: kombinasyonMetni || (kombinasyonId ? kombinasyonlar.find(k => k.id === kombinasyonId)?.name : ''),
-      kombinasyonId,
+      kombinasyonMetni,
+      kombinasyonId: '',
       fabrika,
       toplamMiktar,
       adet,
       oncelik,
-      secilenIstasyonlar: manuelSecim ? secilenIstasyonlar : []
+      secilenIstasyonlar
     });
     
     setSiparisNo('');
@@ -82,12 +80,10 @@ const SiparisOlusturForm = () => {
     setMusteri('');
     setCariUnvan('');
     setKombinasyonMetni('');
-    setKombinasyonId('');
     setToplamMiktar('');
     setAdet('');
     setOncelik('2');
     setSecilenIstasyonlar([]);
-    setManuelSecim(false);
   };
   
   const istasyonSecimDegistir = (istasyonId) => {
@@ -197,47 +193,16 @@ const SiparisOlusturForm = () => {
         </div>
         
         <div className="form-grup">
-          <label htmlFor="kombinasyon">Cam Tipi</label>
-          <select
-            id="kombinasyon"
-            value={kombinasyonId}
-            onChange={(e) => {
-              setKombinasyonId(e.target.value);
-              setManuelSecim(e.target.value === 'manuel');
-            }}
-          >
-            <option value="">Seçiniz...</option>
-            <optgroup label={`${fabrika} Özel Tipler`}>
-              {kombinasyonlar
-                .filter(k => k.fabrika === fabrika)
-                .map(k => (
-                  <option key={k.id} value={k.id}>{k.name}</option>
-                ))}
-            </optgroup>
-            <optgroup label="Genel Tipler">
-              {kombinasyonlar
-                .filter(k => k.fabrika === 'GENEL')
-                .map(k => (
-                  <option key={k.id} value={k.id}>{k.name}</option>
-                ))}
-            </optgroup>
-            <option value="manuel">Manuel Giriş</option>
-          </select>
+          <label htmlFor="kombinasyonMetni">Cam Tipi</label>
+          <input
+            type="text"
+            id="kombinasyonMetni"
+            value={kombinasyonMetni}
+            onChange={(e) => setKombinasyonMetni(e.target.value)}
+            placeholder="Örn: 6 mm Coolplus 62/44"
+            required
+          />
         </div>
-        
-        {manuelSecim && (
-          <div className="form-grup">
-            <label htmlFor="kombinasyonMetni">Cam Açıklaması</label>
-            <input
-              type="text"
-              id="kombinasyonMetni"
-              value={kombinasyonMetni}
-              onChange={(e) => setKombinasyonMetni(e.target.value)}
-              placeholder="Örn: 6 mm Coolplus 62/44"
-              required={manuelSecim}
-            />
-          </div>
-        )}
         
         <div className="form-row">
           <div className="form-grup">
@@ -280,68 +245,64 @@ const SiparisOlusturForm = () => {
           </select>
         </div>
         
-        {manuelSecim && (
-          <>
-            <div className="form-grup">
-              <label>İstasyon Rotası (Manuel Seçim)</label>
-              <div className="istasyon-secenekleri">
-                {istasyonlar
-                  .filter(istasyon => istasyon.fabrika === fabrika)
-                  .map(istasyon => (
-                    <label key={istasyon.id} className="istasyon-secim">
-                      <input
-                        type="checkbox"
-                        checked={secilenIstasyonlar.includes(istasyon.id)}
-                        onChange={() => istasyonSecimDegistir(istasyon.id)}
-                      />
-                      <span>{istasyon.name}</span>
-                    </label>
-                  ))}
-              </div>
+        <div className="form-grup">
+          <label>İstasyon Rotası</label>
+          <div className="istasyon-secenekleri">
+            {istasyonlar
+              .filter(istasyon => istasyon.fabrika === fabrika)
+              .map(istasyon => (
+                <label key={istasyon.id} className="istasyon-secim">
+                  <input
+                    type="checkbox"
+                    checked={secilenIstasyonlar.includes(istasyon.id)}
+                    onChange={() => istasyonSecimDegistir(istasyon.id)}
+                  />
+                  <span>{istasyon.name}</span>
+                </label>
+              ))}
+          </div>
+        </div>
+        
+        {secilenIstasyonlar.length > 0 && (
+          <div className="form-grup">
+            <label>İstasyon Sırası</label>
+            <div className="istasyon-sirasi">
+              {secilenIstasyonlar.map((istasyonId, index) => {
+                const istasyon = istasyonlar.find(i => i.id === istasyonId);
+                return (
+                  <div key={istasyonId} className="istasyon-sira-item">
+                    <span className="sira-no">{index + 1}</span>
+                    <span className="istasyon-adi">{istasyon?.name}</span>
+                    <div className="sira-butonlar">
+                      <button
+                        type="button"
+                        className="sira-btn"
+                        onClick={() => istasyonYukariTasi(index)}
+                        disabled={index === 0}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        className="sira-btn"
+                        onClick={() => istasyonAsagiTasi(index)}
+                        disabled={index === secilenIstasyonlar.length - 1}
+                      >
+                        ↓
+                      </button>
+                      <button
+                        type="button"
+                        className="sira-btn sil"
+                        onClick={() => istasyonSil(istasyonId)}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-            
-            {secilenIstasyonlar.length > 0 && (
-              <div className="form-grup">
-                <label>İstasyon Sırası (Sürükle-Bırak ile düzenle)</label>
-                <div className="istasyon-sirasi">
-                  {secilenIstasyonlar.map((istasyonId, index) => {
-                    const istasyon = istasyonlar.find(i => i.id === istasyonId);
-                    return (
-                      <div key={istasyonId} className="istasyon-sira-item">
-                        <span className="sira-no">{index + 1}</span>
-                        <span className="istasyon-adi">{istasyon?.name}</span>
-                        <div className="sira-butonlar">
-                          <button
-                            type="button"
-                            className="sira-btn"
-                            onClick={() => istasyonYukariTasi(index)}
-                            disabled={index === 0}
-                          >
-                            ↑
-                          </button>
-                          <button
-                            type="button"
-                            className="sira-btn"
-                            onClick={() => istasyonAsagiTasi(index)}
-                            disabled={index === secilenIstasyonlar.length - 1}
-                          >
-                            ↓
-                          </button>
-                          <button
-                            type="button"
-                            className="sira-btn sil"
-                            onClick={() => istasyonSil(istasyonId)}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </>
+          </div>
         )}
         
         <button type="submit" className="btn btn-success btn-lg">

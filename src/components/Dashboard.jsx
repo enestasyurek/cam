@@ -38,7 +38,7 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
-      <h1>Cam Fabrikası Üretim Takip Sistemi</h1>
+      <h1>Efes Cam Üretim Takip Sistemi</h1>
       
       {!secilenFabrika ? (
         <div className="fabrika-secimi">
@@ -48,15 +48,15 @@ const Dashboard = () => {
               className="fabrika-kart" 
               onClick={() => fabrikaSec('A1')}
             >
-              <h3>A1 Fabrikası</h3>
-              <p>Ana Üretim Tesisi</p>
+              <h3>Merkez Fabrika</h3>
+              <p>A1 Tesisi</p>
             </div>
             <div 
               className="fabrika-kart" 
               onClick={() => fabrikaSec('B1')}
             >
-              <h3>B1 Fabrikası</h3>
-              <p>Yan Üretim Tesisi</p>
+              <h3>Şube Fabrika</h3>
+              <p>B1 Tesisi</p>
             </div>
           </div>
         </div>

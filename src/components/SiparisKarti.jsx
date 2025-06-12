@@ -117,6 +117,10 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
             >
               Kırık
             </button>
+          </div>
+        )}
+        {!istasyonGorunumu && aktifGorunum === 'admin' && (
+          <div className="siparis-butonlar">
             <button 
               onClick={() => setDuzenleModalAcik(true)}
               className="btn btn-warning btn-sm"
