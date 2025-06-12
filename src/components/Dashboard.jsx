@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useFabrika } from '../context/FabrikaContext';
 import IstasyonGoruntule from './IstasyonGoruntule';
+import logo from '../assets/logo.jpg';
 
 const Dashboard = () => {
   const { 
@@ -38,6 +39,7 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
+      <img src={logo} alt="Efes Cam" className="dashboard-logo" />
       <h1>Efes Cam Üretim Takip Sistemi</h1>
       
       {!secilenFabrika ? (

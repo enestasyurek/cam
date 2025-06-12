@@ -8,8 +8,9 @@ const SiparisOlusturForm = () => {
   const [siparisTarihi, setSiparisTarihi] = useState(new Date().toISOString().split('T')[0]);
   const [teslimTarihi, setTeslimTarihi] = useState('');
   const [musteri, setMusteri] = useState('');
-  const [cariUnvan, setCariUnvan] = useState('');
-  const [kombinasyonMetni, setKombinasyonMetni] = useState('');
+  const [projeAdi, setProjeAdi] = useState('');
+  const [camKombinasyonu, setCamKombinasyonu] = useState('');
+  const [camTipi, setCamTipi] = useState('');
   const [fabrika, setFabrika] = useState('A1');
   const [toplamMiktar, setToplamMiktar] = useState('');
   const [adet, setAdet] = useState('');
@@ -42,8 +43,12 @@ const SiparisOlusturForm = () => {
       errors.push('Müşteri adı zorunludur');
     }
     
-    if (!kombinasyonMetni.trim()) {
-      errors.push('Cam tipi açıklaması zorunludur');
+    if (!camTipi.trim()) {
+      errors.push('Cam tipi zorunludur');
+    }
+    
+    if (!camKombinasyonu.trim()) {
+      errors.push('Cam kombinasyonu zorunludur');
     }
     
     if (secilenIstasyonlar.length === 0) {
@@ -64,9 +69,9 @@ const SiparisOlusturForm = () => {
       siparisTarihi,
       teslimTarihi,
       musteri,
-      cariUnvan,
-      kombinasyonMetni,
-      kombinasyonId: '',
+      projeAdi,
+      camKombinasyonu,
+      camTipi,
       fabrika,
       toplamMiktar,
       adet,
@@ -78,8 +83,9 @@ const SiparisOlusturForm = () => {
     setSiparisTarihi(new Date().toISOString().split('T')[0]);
     setTeslimTarihi('');
     setMusteri('');
-    setCariUnvan('');
-    setKombinasyonMetni('');
+    setProjeAdi('');
+    setCamKombinasyonu('');
+    setCamTipi('');
     setToplamMiktar('');
     setAdet('');
     setOncelik('2');
@@ -170,13 +176,13 @@ const SiparisOlusturForm = () => {
         </div>
         
         <div className="form-grup">
-          <label htmlFor="cariUnvan">Cari Ünvan</label>
+          <label htmlFor="projeAdi">Proje</label>
           <input
             type="text"
-            id="cariUnvan"
-            value={cariUnvan}
-            onChange={(e) => setCariUnvan(e.target.value)}
-            placeholder="Şirket Ünvanı (Opsiyonel)"
+            id="projeAdi"
+            value={projeAdi}
+            onChange={(e) => setProjeAdi(e.target.value)}
+            placeholder="Proje Adı (Opsiyonel)"
           />
         </div>
         
@@ -193,13 +199,25 @@ const SiparisOlusturForm = () => {
         </div>
         
         <div className="form-grup">
-          <label htmlFor="kombinasyonMetni">Cam Tipi</label>
+          <label htmlFor="camKombinasyonu">Cam Kombinasyonu</label>
           <input
             type="text"
-            id="kombinasyonMetni"
-            value={kombinasyonMetni}
-            onChange={(e) => setKombinasyonMetni(e.target.value)}
-            placeholder="Örn: 6 mm Coolplus 62/44"
+            id="camKombinasyonu"
+            value={camKombinasyonu}
+            onChange={(e) => setCamKombinasyonu(e.target.value)}
+            placeholder="Örn: 6+16+6"
+            required
+          />
+        </div>
+        
+        <div className="form-grup">
+          <label htmlFor="camTipi">Cam Tipi</label>
+          <input
+            type="text"
+            id="camTipi"
+            value={camTipi}
+            onChange={(e) => setCamTipi(e.target.value)}
+            placeholder="Örn: Coolplus 62/44"
             required
           />
         </div>

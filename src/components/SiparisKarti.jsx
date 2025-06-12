@@ -4,12 +4,15 @@ import { useFabrika } from '../context/FabrikaContext';
 const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
   const { iseBasla, isiBitir, aktifGorunum, istasyonlar, kirilanCamBildir, siparisDuzenle, toast } = useFabrika();
   const [kirilanModalAcik, setKirilanModalAcik] = useState(false);
+  const [kirilanPozNo, setKirilanPozNo] = useState('');
   const [kirilanAdet, setKirilanAdet] = useState('');
-  const [kirilanAciklama, setKirilanAciklama] = useState('');
+  const [kirilanSebep, setKirilanSebep] = useState('');
   const [duzenleModalAcik, setDuzenleModalAcik] = useState(false);
   const [duzenleForm, setDuzenleForm] = useState({
     musteri: siparis.musteri,
-    cariUnvan: siparis.cariUnvan,
+    projeAdi: siparis.projeAdi,
+    camKombinasyonu: siparis.camKombinasyonu,
+    camTipi: siparis.camTipi,
     toplamMiktar: siparis.toplamMiktar,
     adet: siparis.adet
   });
@@ -34,6 +37,11 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
   };
   
   const kirilanCamKaydet = () => {
+    if (!kirilanPozNo.trim()) {
+      toast.error('Lütfen poz numarası giriniz!');
+      return;
+    }
+    
     if (!kirilanAdet || parseInt(kirilanAdet) <= 0) {
       toast.error('Lütfen geçerli bir adet giriniz!');
       return;
@@ -44,10 +52,16 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
       return;
     }
     
-    kirilanCamBildir(istasyonId, siparis.id, kirilanAdet, kirilanAciklama);
+    if (!kirilanSebep.trim()) {
+      toast.error('Lütfen kırılma sebebini giriniz!');
+      return;
+    }
+    
+    kirilanCamBildir(istasyonId, siparis.id, kirilanAdet, `Poz: ${kirilanPozNo} - ${kirilanSebep}`);
     setKirilanModalAcik(false);
+    setKirilanPozNo('');
     setKirilanAdet('');
-    setKirilanAciklama('');
+    setKirilanSebep('');
   };
   
   const siparisDuzenleKaydet = () => {
@@ -136,7 +150,7 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
         <div className="detay-grup">
           <h5>Müşteri Bilgileri</h5>
           <p><strong>Müşteri:</strong> {siparis.musteri}</p>
-          {siparis.cariUnvan && <p><strong>Cari Ünvan:</strong> {siparis.cariUnvan}</p>}
+          {siparis.projeAdi && <p><strong>Proje:</strong> {siparis.projeAdi}</p>}
         </div>
         
         <div className="detay-grup">
@@ -148,7 +162,8 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
         
         <div className="detay-grup">
           <h5>Ürün Detayları</h5>
-          <p><strong>Kombinasyon:</strong> {siparis.kombinasyonAdi}</p>
+          {siparis.camKombinasyonu && <p><strong>Cam Kombinasyonu:</strong> {siparis.camKombinasyonu}</p>}
+          {siparis.camTipi && <p><strong>Cam Tipi:</strong> {siparis.camTipi}</p>}
           {siparis.toplamMiktar > 0 && 
             <p><strong>Miktar:</strong> {siparis.toplamMiktar} m²</p>
           }
@@ -167,30 +182,42 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
       
       {/* Kırılan Cam Modal */}
       {kirilanModalAcik && (
-        <div className="modal-overlay" onClick={() => setKirilanModalAcik(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay modal-fullscreen" onClick={() => setKirilanModalAcik(false)}>
+          <div className="modal-content modal-content-fullscreen" onClick={(e) => e.stopPropagation()}>
             <h3>Kırılan Cam Bildir</h3>
             <div className="form-grup">
-              <label>Kırılan Adet</label>
+              <label>Poz No</label>
+              <input
+                type="text"
+                value={kirilanPozNo}
+                onChange={(e) => setKirilanPozNo(e.target.value)}
+                placeholder="Poz numarasını giriniz"
+                autoFocus
+              />
+            </div>
+            <div className="form-grup">
+              <label>Adet</label>
               <input
                 type="number"
                 value={kirilanAdet}
                 onChange={(e) => setKirilanAdet(e.target.value)}
                 min="1"
                 max={siparis.adet}
+                placeholder="Kırılan adet"
               />
             </div>
             <div className="form-grup">
-              <label>Açıklama</label>
+              <label>Sebep</label>
               <textarea
-                value={kirilanAciklama}
-                onChange={(e) => setKirilanAciklama(e.target.value)}
-                placeholder="Kırılma sebebi..."
+                value={kirilanSebep}
+                onChange={(e) => setKirilanSebep(e.target.value)}
+                placeholder="Kırılma sebebini açıklayınız..."
+                rows="4"
               />
             </div>
             <div className="modal-buttons">
-              <button className="btn btn-secondary" onClick={() => setKirilanModalAcik(false)}>İptal</button>
-              <button className="btn btn-danger" onClick={kirilanCamKaydet}>Kaydet</button>
+              <button className="btn btn-secondary btn-lg" onClick={() => setKirilanModalAcik(false)}>İptal</button>
+              <button className="btn btn-danger btn-lg" onClick={kirilanCamKaydet}>Kaydet</button>
             </div>
           </div>
         </div>
@@ -198,8 +225,8 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
       
       {/* Düzenleme Modal */}
       {duzenleModalAcik && (
-        <div className="modal-overlay" onClick={() => setDuzenleModalAcik(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay modal-fullscreen" onClick={() => setDuzenleModalAcik(false)}>
+          <div className="modal-content modal-content-fullscreen" onClick={(e) => e.stopPropagation()}>
             <h3>Siparişi Düzenle</h3>
             <div className="form-grup">
               <label>Müşteri</label>
@@ -210,11 +237,30 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
               />
             </div>
             <div className="form-grup">
-              <label>Cari Ünvan</label>
+              <label>Proje</label>
               <input
                 type="text"
-                value={duzenleForm.cariUnvan}
-                onChange={(e) => setDuzenleForm({...duzenleForm, cariUnvan: e.target.value})}
+                value={duzenleForm.projeAdi || ''}
+                onChange={(e) => setDuzenleForm({...duzenleForm, projeAdi: e.target.value})}
+                placeholder="Proje Adı"
+              />
+            </div>
+            <div className="form-grup">
+              <label>Cam Kombinasyonu</label>
+              <input
+                type="text"
+                value={duzenleForm.camKombinasyonu || ''}
+                onChange={(e) => setDuzenleForm({...duzenleForm, camKombinasyonu: e.target.value})}
+                placeholder="Örn: 6+16+6"
+              />
+            </div>
+            <div className="form-grup">
+              <label>Cam Tipi</label>
+              <input
+                type="text"
+                value={duzenleForm.camTipi || ''}
+                onChange={(e) => setDuzenleForm({...duzenleForm, camTipi: e.target.value})}
+                placeholder="Örn: Coolplus 62/44"
               />
             </div>
             <div className="form-grup">
@@ -235,8 +281,8 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
               />
             </div>
             <div className="modal-buttons">
-              <button className="btn btn-secondary" onClick={() => setDuzenleModalAcik(false)}>İptal</button>
-              <button className="btn btn-primary" onClick={siparisDuzenleKaydet}>Kaydet</button>
+              <button className="btn btn-secondary btn-lg" onClick={() => setDuzenleModalAcik(false)}>İptal</button>
+              <button className="btn btn-primary btn-lg" onClick={siparisDuzenleKaydet}>Kaydet</button>
             </div>
           </div>
         </div>
