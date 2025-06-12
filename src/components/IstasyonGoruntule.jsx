@@ -1,5 +1,6 @@
 import { useFabrika } from '../context/FabrikaContext';
 import SiparisKarti from './SiparisKarti';
+import EmptyState from './EmptyState';
 
 const IstasyonGoruntule = ({ istasyonId, istasyonGorunumu = false }) => {
   const { istasyonlar, istasyonSiparisleriGetir, siralama, siralamaDegistir } = useFabrika();
@@ -44,10 +45,11 @@ const IstasyonGoruntule = ({ istasyonId, istasyonGorunumu = false }) => {
       </div>
       
       {istasyonSiparisleri.length === 0 ? (
-        <div className="empty-state">
-          <h3>Sipariş Yok</h3>
-          <p>Bu istasyonda bekleyen sipariş bulunmamaktadır.</p>
-        </div>
+        <EmptyState 
+          title="Sipariş Yok"
+          message={`${istasyon ? istasyon.name : 'Bu'} istasyonunda şu anda bekleyen veya işlemde olan sipariş bulunmuyor.`}
+          icon="📦"
+        />
       ) : (
         <>
           <div className="siralama-basliklar">

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useFabrika } from '../context/FabrikaContext';
 
 const SiparisOlusturForm = () => {
-  const { istasyonlar, kombinasyonlar, siparisOlustur } = useFabrika();
+  const { istasyonlar, kombinasyonlar, siparisOlustur, toast } = useFabrika();
   
   const [siparisNo, setSiparisNo] = useState('');
   const [siparisTarihi, setSiparisTarihi] = useState(new Date().toISOString().split('T')[0]);
@@ -21,33 +21,43 @@ const SiparisOlusturForm = () => {
   const formGonder = (e) => {
     e.preventDefault();
     
+    // Form validation
+    const errors = [];
+    
     if (!siparisNo.trim()) {
-      alert('Lütfen sipariş numarası girin!');
-      return;
+      errors.push('Sipariş numarası zorunludur');
     }
     
     if (!siparisTarihi) {
-      alert('Lütfen sipariş tarihini girin!');
-      return;
+      errors.push('Sipariş tarihi zorunludur');
     }
     
     if (!teslimTarihi) {
-      alert('Lütfen teslim tarihini girin!');
-      return;
+      errors.push('Teslim tarihi zorunludur');
+    }
+    
+    if (new Date(teslimTarihi) < new Date(siparisTarihi)) {
+      errors.push('Teslim tarihi sipariş tarihinden önce olamaz');
     }
     
     if (!musteri.trim()) {
-      alert('Lütfen müşteri adını girin!');
-      return;
+      errors.push('Müşteri adı zorunludur');
     }
     
     if (!kombinasyonId && !manuelSecim) {
-      alert('Lütfen bir cam tipi seçin veya manuel giriş yapın!');
-      return;
+      errors.push('Cam tipi seçimi zorunludur');
     }
     
     if (manuelSecim && secilenIstasyonlar.length === 0) {
-      alert('Manuel girişte en az bir istasyon seçmelisiniz!');
+      errors.push('Manuel girişte en az bir istasyon seçmelisiniz');
+    }
+    
+    if (!adet || parseInt(adet) <= 0) {
+      errors.push('Adet sıfırdan büyük olmalıdır');
+    }
+    
+    if (errors.length > 0) {
+      toast.error(errors[0]); // Show the first error
       return;
     }
     

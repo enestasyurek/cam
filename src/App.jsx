@@ -4,6 +4,7 @@ import SiparisOlusturForm from './components/SiparisOlusturForm';
 import IstasyonGoruntule from './components/IstasyonGoruntule';
 import GorunumSecici from './components/GorunumSecici';
 import Rapor from './components/Rapor';
+import { ToastContainer } from './components/Toast';
 import './App.css';
 
 // Ana içerik bileşeni
@@ -44,12 +45,22 @@ const IcerikGoruntule = () => {
 function App() {
   return (
     <FabrikaProvider>
-      <div className="app">
-        <GorunumSecici />
-        <IcerikGoruntule />
-      </div>
+      <AppContent />
     </FabrikaProvider>
   );
 }
+
+// Separate component to use the context
+const AppContent = () => {
+  const { toast } = useFabrika();
+  
+  return (
+    <div className="app">
+      <GorunumSecici />
+      <IcerikGoruntule />
+      <ToastContainer toasts={toast.toasts} removeToast={toast.removeToast} />
+    </div>
+  );
+};
 
 export default App;

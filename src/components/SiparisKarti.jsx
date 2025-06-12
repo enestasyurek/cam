@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useFabrika } from '../context/FabrikaContext';
 
 const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
-  const { iseBasla, isiBitir, aktifGorunum, istasyonlar, kirilanCamBildir, siparisDuzenle } = useFabrika();
+  const { iseBasla, isiBitir, aktifGorunum, istasyonlar, kirilanCamBildir, siparisDuzenle, toast } = useFabrika();
   const [kirilanModalAcik, setKirilanModalAcik] = useState(false);
   const [kirilanAdet, setKirilanAdet] = useState('');
   const [kirilanAciklama, setKirilanAciklama] = useState('');
@@ -35,12 +35,12 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
   
   const kirilanCamKaydet = () => {
     if (!kirilanAdet || parseInt(kirilanAdet) <= 0) {
-      alert('Lütfen geçerli bir adet giriniz!');
+      toast.error('Lütfen geçerli bir adet giriniz!');
       return;
     }
     
     if (parseInt(kirilanAdet) > siparis.adet) {
-      alert('Kırılan adet, sipariş adedinden fazla olamaz!');
+      toast.error('Kırılan adet, sipariş adedinden fazla olamaz!');
       return;
     }
     
@@ -51,8 +51,19 @@ const SiparisKarti = ({ siparis, istasyonGorunumu, istasyonId }) => {
   };
   
   const siparisDuzenleKaydet = () => {
+    if (!duzenleForm.musteri.trim()) {
+      toast.error('Müşteri adı boş olamaz!');
+      return;
+    }
+    
+    if (duzenleForm.adet && parseInt(duzenleForm.adet) <= 0) {
+      toast.error('Adet sıfırdan büyük olmalıdır!');
+      return;
+    }
+    
     siparisDuzenle(siparis.id, duzenleForm);
     setDuzenleModalAcik(false);
+    toast.success('Sipariş güncellendi!');
   };
   
   const butonlarEtkin = aktifGorunum === `istasyon-${istasyonId}`;

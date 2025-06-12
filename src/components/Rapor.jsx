@@ -7,7 +7,9 @@ const Rapor = () => {
     kirilanCamlar, 
     istasyonlar, 
     siparisAra,
-    istasyonKuyruklar 
+    istasyonKuyruklar,
+    setAktifGorunum,
+    istasyonSiparisleriGetir
   } = useFabrika();
   
   const [aramaMetni, setAramaMetni] = useState('');
@@ -61,7 +63,7 @@ const Rapor = () => {
         <h2>📊 Fabrika Raporu</h2>
         <button 
           className="geri-btn"
-          onClick={() => window.location.reload()}
+          onClick={() => setAktifGorunum('admin')}
         >
           ← Ana Sayfaya Dön
         </button>

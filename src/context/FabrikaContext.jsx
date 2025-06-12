@@ -1,10 +1,12 @@
 import { createContext, useState, useContext } from 'react';
+import { useToast } from '../hooks/useToast';
 
 // Fabrika bağlamını oluştur
 const FabrikaContext = createContext();
 
 // Bağlam sağlayıcı bileşeni
 export const FabrikaProvider = ({ children }) => {
+  const toast = useToast();
   // İstasyonlar için veri - A1 ve B1 için ayrı istasyonlar
   const [istasyonlar] = useState([
     // A1 Fabrikası İstasyonları
@@ -139,7 +141,7 @@ export const FabrikaProvider = ({ children }) => {
     }
 
     if (istasyonSirasi.length === 0) {
-      alert('En az bir istasyon seçmelisiniz veya bir kombinasyon belirtmelisiniz!');
+      toast.error('En az bir istasyon seçmelisiniz veya bir kombinasyon belirtmelisiniz!');
       return;
     }
 
@@ -178,6 +180,8 @@ export const FabrikaProvider = ({ children }) => {
         [ilkIstasyon]: [...(onceki[ilkIstasyon] || []), yeniSiparis.id]
       }));
     }
+    
+    toast.success(`Sipariş ${siparisNo} başarıyla oluşturuldu!`);
   };
 
   // Gün sayısını hesaplama yardımcı fonksiyonu
@@ -305,6 +309,8 @@ export const FabrikaProvider = ({ children }) => {
         return siparis;
       });
     });
+    
+    toast.warning(`${adet} adet kırılan cam kaydedildi.`);
   };
 
   // Sipariş arama fonksiyonu
@@ -410,7 +416,8 @@ export const FabrikaProvider = ({ children }) => {
     kirilanCamBildir,
     istasyonSiparisleriGetir,
     siralamaDegistir,
-    siralaSiparisler
+    siralaSiparisler,
+    toast
   };
 
   return (
