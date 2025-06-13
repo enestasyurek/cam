@@ -60,6 +60,14 @@ const Dashboard = () => {
               <p>B1 Tesisi</p>
             </div>
           </div>
+          <div className="dashboard-actions">
+            <button 
+              className="btn btn-primary btn-lg" 
+              onClick={() => setAktifGorunum('siparis-sorgula')}
+            >
+              Sipariş Sorgula
+            </button>
+          </div>
         </div>
       ) : !secilenIstasyon ? (
         <div className="istasyon-secimi">

@@ -4,6 +4,77 @@ import { useFabrika } from '../context/FabrikaContext';
 const SiparisOlusturForm = () => {
   const { istasyonlar, siparisOlustur, toast } = useFabrika();
   
+  const camTurleriA1 = [
+    { kalinlik: '4 mm', tip: 'Bronz Ayna' },
+    { kalinlik: '4 mm', tip: 'Düz Cam' },
+    { kalinlik: '4 mm', tip: 'Füme Cam' },
+    { kalinlik: '4 mm', tip: 'Low-E Cam' },
+    { kalinlik: '4 mm', tip: 'Satina Cam' },
+    { kalinlik: '4 mm', tip: 'Tentesol Füme Reflekte' },
+    { kalinlik: '4 mm', tip: 'Ultra Clear Cam' },
+    { kalinlik: '4 mm', tip: 'Yeşil Cam' },
+    { kalinlik: '5 mm', tip: 'Düz Cam' },
+    { kalinlik: '5 mm', tip: 'Nervürlü Cam' },
+    { kalinlik: '6 mm', tip: 'AGC Planibel Clearlite-EX CLR' },
+    { kalinlik: '6 mm', tip: 'AGC Ultra Clear' },
+    { kalinlik: '6 mm', tip: 'Bronz Cam' },
+    { kalinlik: '6 mm', tip: 'Düz Cam' },
+    { kalinlik: '6 mm', tip: 'Füme Cam' },
+    { kalinlik: '6 mm', tip: 'Mavi Cam' },
+    { kalinlik: '6 mm', tip: 'Mısır Füme Reflekte' },
+    { kalinlik: '6 mm', tip: 'Pilkington Mirropane' },
+    { kalinlik: '6 mm', tip: 'Satina Cam' },
+    { kalinlik: '6 mm', tip: 'Ultra Clear' },
+    { kalinlik: '6 mm', tip: 'Yeşil Cam' },
+    { kalinlik: '8 mm', tip: 'Düz Cam' },
+    { kalinlik: '8 mm', tip: 'Füme Cam' },
+    { kalinlik: '8 mm', tip: 'Satina Cam' },
+    { kalinlik: '10 mm', tip: 'Düz Cam' },
+    { kalinlik: '10 mm', tip: 'AGC Clear Vision' },
+    { kalinlik: '10 mm', tip: 'Şişecam Extra Clear' },
+    { kalinlik: '10 mm', tip: 'Ultra Clear' },
+    { kalinlik: '12 mm', tip: 'Düz Cam' }
+  ];
+  
+  const camTurleriB1 = [
+    { kalinlik: '4 mm', tip: 'Coolplus 62/44' },
+    { kalinlik: '4 mm', tip: 'Düz Cam' },
+    { kalinlik: '4 mm', tip: 'Füme Cam' },
+    { kalinlik: '4 mm', tip: 'Low-E Cam' },
+    { kalinlik: '4 mm', tip: 'Termoplus 71/53' },
+    { kalinlik: '5 mm', tip: 'Düz Cam' },
+    { kalinlik: '6 mm', tip: 'Coolplus 50/33' },
+    { kalinlik: '6 mm', tip: 'Coolplus 58/32' },
+    { kalinlik: '6 mm', tip: 'Coolplus 62/44' },
+    { kalinlik: '6 mm', tip: 'Coolplus 70/40' },
+    { kalinlik: '6 mm', tip: 'Düz Cam' },
+    { kalinlik: '6 mm', tip: 'Füme Reflekte' },
+    { kalinlik: '6 mm', tip: 'Low-E Cam' },
+    { kalinlik: '6 mm', tip: 'Mısır Füme Reflekte' },
+    { kalinlik: '6 mm', tip: 'Solar Low-E' },
+    { kalinlik: '6 mm', tip: 'Solar Low-E 70/37' },
+    { kalinlik: '6 mm', tip: 'Solar Low-e Füme 31/28' },
+    { kalinlik: '6 mm', tip: 'Sunguard SN 70/37 HT' },
+    { kalinlik: '6 mm', tip: 'Tentesol Gümüş Reflekte' },
+    { kalinlik: '6 mm', tip: 'Tentesol Yeşil Reflekte' },
+    { kalinlik: '6 mm', tip: 'Yorsan Mavi Reflekte' },
+    { kalinlik: '8 mm', tip: 'AGC Energy 65/42S' },
+    { kalinlik: '8 mm', tip: 'Coolplus 43/28' },
+    { kalinlik: '8 mm', tip: 'Coolplus 50/33' },
+    { kalinlik: '8 mm', tip: 'Coolplus 62/44' },
+    { kalinlik: '8 mm', tip: 'Düz Cam' },
+    { kalinlik: '8 mm', tip: 'SNX 60 HT' },
+    { kalinlik: '8 mm', tip: 'Sunguard SN 70/37 HT' },
+    { kalinlik: '8 mm', tip: 'Guardian Solar Low-E SN51 HT' },
+    { kalinlik: '4+4 0,38 mm', tip: 'Lamine Cam' },
+    { kalinlik: '4+4 0,76 mm', tip: 'Lamine Cam' },
+    { kalinlik: '4+4 0,76 mm', tip: 'Akustik Lamine Cam' },
+    { kalinlik: '4+4 0,76 mm', tip: 'Opak Lamine Cam' },
+    { kalinlik: '5+5 0,38 mm', tip: 'Lamine Cam' },
+    { kalinlik: '5+5 0,76 mm', tip: 'Lamine Cam' },
+    { kalinlik: '5+5 0,76 mm', tip: 'Akustik Lamine Cam' }
+  ];
+  
   const [siparisNo, setSiparisNo] = useState('');
   const [siparisTarihi, setSiparisTarihi] = useState(new Date().toISOString().split('T')[0]);
   const [teslimTarihi, setTeslimTarihi] = useState('');
@@ -11,7 +82,8 @@ const SiparisOlusturForm = () => {
   const [projeAdi, setProjeAdi] = useState('');
   const [camKombinasyonu, setCamKombinasyonu] = useState('');
   const [camTipi, setCamTipi] = useState('');
-  const [fabrika, setFabrika] = useState('A1');
+  const [fabrika, setFabrika] = useState('');
+  const [secilenFabrikalar, setSecilenFabrikalar] = useState([]);
   const [toplamMiktar, setToplamMiktar] = useState('');
   const [adet, setAdet] = useState('');
   const [oncelik, setOncelik] = useState('2');
@@ -43,12 +115,16 @@ const SiparisOlusturForm = () => {
       errors.push('Müşteri adı zorunludur');
     }
     
-    if (!camTipi.trim()) {
-      errors.push('Cam tipi zorunludur');
+    if (!camTipi) {
+      errors.push('Cam tipi seçimi zorunludur');
     }
     
     if (!camKombinasyonu.trim()) {
       errors.push('Cam kombinasyonu zorunludur');
+    }
+    
+    if (secilenFabrikalar.length === 0) {
+      errors.push('En az bir fabrika seçmelisiniz');
     }
     
     if (secilenIstasyonlar.length === 0) {
@@ -64,19 +140,24 @@ const SiparisOlusturForm = () => {
       return;
     }
     
-    siparisOlustur({
-      siparisNo,
-      siparisTarihi,
-      teslimTarihi,
-      musteri,
-      projeAdi,
-      camKombinasyonu,
-      camTipi,
-      fabrika,
-      toplamMiktar,
-      adet,
-      oncelik,
-      secilenIstasyonlar
+    secilenFabrikalar.forEach(fabrika => {
+      siparisOlustur({
+        siparisNo: secilenFabrikalar.length > 1 ? `${siparisNo}-${fabrika}` : siparisNo,
+        siparisTarihi,
+        teslimTarihi,
+        musteri,
+        projeAdi,
+        camKombinasyonu,
+        camTipi,
+        fabrika,
+        toplamMiktar,
+        adet,
+        oncelik,
+        secilenIstasyonlar: secilenIstasyonlar.filter(istId => {
+          const istasyon = istasyonlar.find(ist => ist.id === istId);
+          return istasyon && istasyon.fabrika === fabrika;
+        })
+      });
     });
     
     setSiparisNo('');
@@ -86,6 +167,8 @@ const SiparisOlusturForm = () => {
     setProjeAdi('');
     setCamKombinasyonu('');
     setCamTipi('');
+    setFabrika('');
+    setSecilenFabrikalar([]);
     setToplamMiktar('');
     setAdet('');
     setOncelik('2');
@@ -187,15 +270,39 @@ const SiparisOlusturForm = () => {
         </div>
         
         <div className="form-grup">
-          <label htmlFor="fabrika">Fabrika</label>
-          <select
-            id="fabrika"
-            value={fabrika}
-            onChange={(e) => setFabrika(e.target.value)}
-          >
-            <option value="A1">A1 Fabrikası</option>
-            <option value="B1">B1 Fabrikası</option>
-          </select>
+          <label>Fabrika Seçimi</label>
+          <div className="fabrika-secim-container">
+            <label className="fabrika-checkbox">
+              <input
+                type="checkbox"
+                value="A1"
+                checked={secilenFabrikalar.includes('A1')}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSecilenFabrikalar([...secilenFabrikalar, 'A1']);
+                  } else {
+                    setSecilenFabrikalar(secilenFabrikalar.filter(f => f !== 'A1'));
+                  }
+                }}
+              />
+              <span>A1 Fabrikası</span>
+            </label>
+            <label className="fabrika-checkbox">
+              <input
+                type="checkbox"
+                value="B1"
+                checked={secilenFabrikalar.includes('B1')}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSecilenFabrikalar([...secilenFabrikalar, 'B1']);
+                  } else {
+                    setSecilenFabrikalar(secilenFabrikalar.filter(f => f !== 'B1'));
+                  }
+                }}
+              />
+              <span>B1 Fabrikası</span>
+            </label>
+          </div>
         </div>
         
         <div className="form-grup">
@@ -212,14 +319,30 @@ const SiparisOlusturForm = () => {
         
         <div className="form-grup">
           <label htmlFor="camTipi">Cam Tipi</label>
-          <input
-            type="text"
+          <select
             id="camTipi"
             value={camTipi}
             onChange={(e) => setCamTipi(e.target.value)}
-            placeholder="Örn: Coolplus 62/44"
             required
-          />
+            disabled={secilenFabrikalar.length === 0}
+          >
+            <option value="">Cam tipi seçin</option>
+            {secilenFabrikalar.length > 0 && [
+              ...(secilenFabrikalar.includes('A1') ? camTurleriA1.map((cam, index) => (
+                <option key={`a1-${index}`} value={`${cam.kalinlik} ${cam.tip}`}>
+                  A1 - {cam.kalinlik} {cam.tip}
+                </option>
+              )) : []),
+              ...(secilenFabrikalar.includes('B1') ? camTurleriB1.map((cam, index) => (
+                <option key={`b1-${index}`} value={`${cam.kalinlik} ${cam.tip}`}>
+                  B1 - {cam.kalinlik} {cam.tip}
+                </option>
+              )) : [])
+            ]}
+          </select>
+          {secilenFabrikalar.length === 0 && (
+            <small className="form-help-text">Önce fabrika seçimi yapın</small>
+          )}
         </div>
         
         <div className="form-row">
@@ -266,9 +389,13 @@ const SiparisOlusturForm = () => {
         <div className="form-grup">
           <label>İstasyon Rotası</label>
           <div className="istasyon-secenekleri">
-            {istasyonlar
-              .filter(istasyon => istasyon.fabrika === fabrika)
-              .map(istasyon => (
+            {secilenFabrikalar.length > 0 ? (
+              secilenFabrikalar.map(fabrika => (
+                <div key={fabrika} className="fabrika-istasyon-grup">
+                  <h4>{fabrika} Fabrikası İstasyonları</h4>
+                  {istasyonlar
+                    .filter(istasyon => istasyon.fabrika === fabrika)
+                    .map(istasyon => (
                 <label key={istasyon.id} className="istasyon-secim">
                   <input
                     type="checkbox"
@@ -278,6 +405,11 @@ const SiparisOlusturForm = () => {
                   <span>{istasyon.name}</span>
                 </label>
               ))}
+                </div>
+              ))
+            ) : (
+              <p className="istasyon-uyari">Önce fabrika seçimi yapın</p>
+            )}
           </div>
         </div>
         

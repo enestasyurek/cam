@@ -518,6 +518,11 @@ a:hover {
   height: auto;
 }
 
+.dashboard-actions {
+  margin-top: var(--spacing-2xl);
+  text-align: center;
+}
+
 /* Fabrika Seçimi */
 .fabrika-secimi h2 {
   text-align: center;
@@ -685,6 +690,71 @@ a:hover {
   .istasyon-secenekleri {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* Fabrika Seçim Container */
+.fabrika-secim-container {
+  display: flex;
+  gap: var(--spacing-lg);
+  margin-top: var(--spacing-sm);
+}
+
+.fabrika-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background-color: var(--white);
+}
+
+.fabrika-checkbox:hover {
+  background-color: var(--gray-50);
+  border-color: var(--primary-color);
+}
+
+.fabrika-checkbox input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+}
+
+.fabrika-checkbox span {
+  color: var(--gray-900);
+}
+
+.fabrika-checkbox input[type="checkbox"]:checked + span {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.fabrika-istasyon-grup {
+  margin-bottom: var(--spacing-lg);
+}
+
+.fabrika-istasyon-grup h4 {
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-md);
+  font-size: 1rem;
+}
+
+.istasyon-uyari {
+  color: var(--gray-600);
+  font-style: italic;
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.form-help-text {
+  display: block;
+  margin-top: var(--spacing-xs);
+  font-size: 0.8rem;
+  color: var(--gray-600);
+  font-style: italic;
 }
 
 .istasyon-secim {
@@ -2269,6 +2339,237 @@ a:hover {
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Sipariş Sorgulama Sayfası */
+.siparis-sorgula {
+  padding: var(--spacing-lg);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sorgula-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2xl);
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+}
+
+.sorgula-header h2 {
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.sorgula-form {
+  background-color: var(--white);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-2xl);
+  margin-bottom: var(--spacing-xl);
+}
+
+.arama-input-container {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: flex-end;
+}
+
+.arama-input-container .arama-input {
+  flex: 1;
+  max-width: 400px;
+}
+
+.hata-mesaj {
+  background-color: var(--danger-color);
+  color: var(--button-text-color, white);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  margin-top: var(--spacing-md);
+  text-align: center;
+}
+
+.siparis-detay-kart {
+  background-color: var(--white);
+  border-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-2xl);
+  margin-top: var(--spacing-xl);
+}
+
+.siparis-detay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 2px solid var(--gray-200);
+}
+
+.siparis-detay-header h3 {
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.siparis-bilgileri {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-xl);
+}
+
+.bilgi-grup {
+  background-color: var(--gray-50);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--gray-200);
+}
+
+.bilgi-grup.tam-genislik {
+  grid-column: 1 / -1;
+}
+
+.bilgi-grup h4 {
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-md);
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bilgi-satirlari {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.bilgi-satir {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid var(--gray-100);
+}
+
+.bilgi-satir:last-child {
+  border-bottom: none;
+}
+
+.bilgi-satir span {
+  color: var(--gray-700);
+  font-size: 0.875rem;
+}
+
+.bilgi-satir strong {
+  color: var(--gray-900);
+  font-weight: 600;
+}
+
+.oncelik-1 {
+  color: var(--danger-color);
+}
+
+.oncelik-2 {
+  color: var(--warning-color);
+}
+
+.oncelik-3 {
+  color: var(--info-color);
+}
+
+.istasyon-rota {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-lg);
+  align-items: center;
+  padding: var(--spacing-lg);
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  margin-top: var(--spacing-md);
+}
+
+.rota-adim {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  position: relative;
+}
+
+.rota-nokta {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--button-text-color, white);
+  background-color: var(--gray-400);
+  transition: all var(--transition-base);
+}
+
+.rota-nokta.bekliyor {
+  background-color: var(--warning-color);
+}
+
+.rota-nokta.işlemde {
+  background-color: var(--info-color);
+}
+
+.rota-nokta.tamamlandı {
+  background-color: var(--success-color);
+}
+
+.rota-bilgi {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.istasyon-isim {
+  font-weight: 600;
+  color: var(--gray-900);
+}
+
+.istasyon-durum {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gray-600);
+}
+
+.istasyon-durum.bekliyor {
+  color: var(--warning-color);
+}
+
+.istasyon-durum.işlemde {
+  color: var(--info-color);
+}
+
+.istasyon-durum.tamamlandı {
+  color: var(--success-color);
+}
+
+.rota-cizgi {
+  width: 50px;
+  height: 2px;
+  background-color: var(--gray-300);
+  margin: 0 var(--spacing-md);
+}
+
+.notlar {
+  color: var(--gray-800);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.kirilan-bilgi {
+  background-color: rgba(239, 68, 68, 0.05);
+  border: 2px solid var(--danger-color);
+}
+
+.kirilan-bilgi h4 {
+  color: var(--danger-color);
 }
 
 /* Print Styles */

@@ -4,6 +4,7 @@ import SiparisOlusturForm from './components/SiparisOlusturForm';
 import IstasyonGoruntule from './components/IstasyonGoruntule';
 import GorunumSecici from './components/GorunumSecici';
 import Rapor from './components/Rapor';
+import SiparisSorgula from './components/SiparisSorgula';
 import { ToastContainer } from './components/Toast';
 import './App.css';
 
@@ -14,6 +15,11 @@ const IcerikGoruntule = () => {
   // Rapor görünümü
   if (aktifGorunum === 'rapor') {
     return <Rapor />;
+  }
+  
+  // Sipariş sorgulama görünümü
+  if (aktifGorunum === 'siparis-sorgula') {
+    return <SiparisSorgula />;
   }
   
   // Eğer aktif görünüm "admin" ise, dashboard ve sipariş oluşturma formunu göster
