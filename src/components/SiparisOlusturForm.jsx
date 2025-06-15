@@ -81,13 +81,14 @@ const SiparisOlusturForm = () => {
   const [musteri, setMusteri] = useState('');
   const [projeAdi, setProjeAdi] = useState('');
   const [camKombinasyonu, setCamKombinasyonu] = useState('');
-  const [camTipi, setCamTipi] = useState('');
-  const [fabrika, setFabrika] = useState('');
+  const [camTipiA1, setCamTipiA1] = useState('');
+  const [camTipiB1, setCamTipiB1] = useState('');
   const [secilenFabrikalar, setSecilenFabrikalar] = useState([]);
   const [toplamMiktar, setToplamMiktar] = useState('');
   const [adet, setAdet] = useState('');
   const [oncelik, setOncelik] = useState('2');
-  const [secilenIstasyonlar, setSecilenIstasyonlar] = useState([]);
+  const [secilenIstasyonlarA1, setSecilenIstasyonlarA1] = useState([]);
+  const [secilenIstasyonlarB1, setSecilenIstasyonlarB1] = useState([]);
   
   const formGonder = (e) => {
     e.preventDefault();
@@ -115,8 +116,12 @@ const SiparisOlusturForm = () => {
       errors.push('Müşteri adı zorunludur');
     }
     
-    if (!camTipi) {
-      errors.push('Cam tipi seçimi zorunludur');
+    if (secilenFabrikalar.includes('A1') && !camTipiA1) {
+      errors.push('A1 fabrikası için cam tipi seçimi zorunludur');
+    }
+    
+    if (secilenFabrikalar.includes('B1') && !camTipiB1) {
+      errors.push('B1 fabrikası için cam tipi seçimi zorunludur');
     }
     
     if (!camKombinasyonu.trim()) {
@@ -127,8 +132,12 @@ const SiparisOlusturForm = () => {
       errors.push('En az bir fabrika seçmelisiniz');
     }
     
-    if (secilenIstasyonlar.length === 0) {
-      errors.push('En az bir istasyon seçmelisiniz');
+    if (secilenFabrikalar.includes('A1') && secilenIstasyonlarA1.length === 0) {
+      errors.push('A1 fabrikası için en az bir istasyon seçmelisiniz');
+    }
+    
+    if (secilenFabrikalar.includes('B1') && secilenIstasyonlarB1.length === 0) {
+      errors.push('B1 fabrikası için en az bir istasyon seçmelisiniz');
     }
     
     if (!adet || parseInt(adet) <= 0) {
@@ -141,6 +150,9 @@ const SiparisOlusturForm = () => {
     }
     
     secilenFabrikalar.forEach(fabrika => {
+      const camTipi = fabrika === 'A1' ? camTipiA1 : camTipiB1;
+      const secilenIstasyonlar = fabrika === 'A1' ? secilenIstasyonlarA1 : secilenIstasyonlarB1;
+      
       siparisOlustur({
         siparisNo: secilenFabrikalar.length > 1 ? `${siparisNo}-${fabrika}` : siparisNo,
         siparisTarihi,
@@ -153,10 +165,7 @@ const SiparisOlusturForm = () => {
         toplamMiktar,
         adet,
         oncelik,
-        secilenIstasyonlar: secilenIstasyonlar.filter(istId => {
-          const istasyon = istasyonlar.find(ist => ist.id === istId);
-          return istasyon && istasyon.fabrika === fabrika;
-        })
+        secilenIstasyonlar
       });
     });
     
@@ -166,43 +175,72 @@ const SiparisOlusturForm = () => {
     setMusteri('');
     setProjeAdi('');
     setCamKombinasyonu('');
-    setCamTipi('');
-    setFabrika('');
+    setCamTipiA1('');
+    setCamTipiB1('');
     setSecilenFabrikalar([]);
     setToplamMiktar('');
     setAdet('');
     setOncelik('2');
-    setSecilenIstasyonlar([]);
+    setSecilenIstasyonlarA1([]);
+    setSecilenIstasyonlarB1([]);
   };
   
-  const istasyonSecimDegistir = (istasyonId) => {
-    setSecilenIstasyonlar(onceki => {
-      if (onceki.includes(istasyonId)) {
-        return onceki.filter(id => id !== istasyonId);
-      } else {
-        return [...onceki, istasyonId];
-      }
-    });
+  const istasyonSecimDegistir = (istasyonId, fabrika) => {
+    if (fabrika === 'A1') {
+      setSecilenIstasyonlarA1(onceki => {
+        if (onceki.includes(istasyonId)) {
+          return onceki.filter(id => id !== istasyonId);
+        } else {
+          return [...onceki, istasyonId];
+        }
+      });
+    } else {
+      setSecilenIstasyonlarB1(onceki => {
+        if (onceki.includes(istasyonId)) {
+          return onceki.filter(id => id !== istasyonId);
+        } else {
+          return [...onceki, istasyonId];
+        }
+      });
+    }
   };
   
-  const istasyonYukariTasi = (index) => {
+  const istasyonYukariTasi = (index, fabrika) => {
     if (index > 0) {
-      const yeniSira = [...secilenIstasyonlar];
-      [yeniSira[index - 1], yeniSira[index]] = [yeniSira[index], yeniSira[index - 1]];
-      setSecilenIstasyonlar(yeniSira);
+      if (fabrika === 'A1') {
+        const yeniSira = [...secilenIstasyonlarA1];
+        [yeniSira[index - 1], yeniSira[index]] = [yeniSira[index], yeniSira[index - 1]];
+        setSecilenIstasyonlarA1(yeniSira);
+      } else {
+        const yeniSira = [...secilenIstasyonlarB1];
+        [yeniSira[index - 1], yeniSira[index]] = [yeniSira[index], yeniSira[index - 1]];
+        setSecilenIstasyonlarB1(yeniSira);
+      }
     }
   };
   
-  const istasyonAsagiTasi = (index) => {
-    if (index < secilenIstasyonlar.length - 1) {
-      const yeniSira = [...secilenIstasyonlar];
-      [yeniSira[index], yeniSira[index + 1]] = [yeniSira[index + 1], yeniSira[index]];
-      setSecilenIstasyonlar(yeniSira);
+  const istasyonAsagiTasi = (index, fabrika) => {
+    if (fabrika === 'A1') {
+      if (index < secilenIstasyonlarA1.length - 1) {
+        const yeniSira = [...secilenIstasyonlarA1];
+        [yeniSira[index], yeniSira[index + 1]] = [yeniSira[index + 1], yeniSira[index]];
+        setSecilenIstasyonlarA1(yeniSira);
+      }
+    } else {
+      if (index < secilenIstasyonlarB1.length - 1) {
+        const yeniSira = [...secilenIstasyonlarB1];
+        [yeniSira[index], yeniSira[index + 1]] = [yeniSira[index + 1], yeniSira[index]];
+        setSecilenIstasyonlarB1(yeniSira);
+      }
     }
   };
   
-  const istasyonSil = (istasyonId) => {
-    setSecilenIstasyonlar(onceki => onceki.filter(id => id !== istasyonId));
+  const istasyonSil = (istasyonId, fabrika) => {
+    if (fabrika === 'A1') {
+      setSecilenIstasyonlarA1(onceki => onceki.filter(id => id !== istasyonId));
+    } else {
+      setSecilenIstasyonlarB1(onceki => onceki.filter(id => id !== istasyonId));
+    }
   };
   
   return (
@@ -282,6 +320,8 @@ const SiparisOlusturForm = () => {
                     setSecilenFabrikalar([...secilenFabrikalar, 'A1']);
                   } else {
                     setSecilenFabrikalar(secilenFabrikalar.filter(f => f !== 'A1'));
+                    setCamTipiA1('');
+                    setSecilenIstasyonlarA1([]);
                   }
                 }}
               />
@@ -297,6 +337,8 @@ const SiparisOlusturForm = () => {
                     setSecilenFabrikalar([...secilenFabrikalar, 'B1']);
                   } else {
                     setSecilenFabrikalar(secilenFabrikalar.filter(f => f !== 'B1'));
+                    setCamTipiB1('');
+                    setSecilenIstasyonlarB1([]);
                   }
                 }}
               />
@@ -317,33 +359,51 @@ const SiparisOlusturForm = () => {
           />
         </div>
         
-        <div className="form-grup">
-          <label htmlFor="camTipi">Cam Tipi</label>
-          <select
-            id="camTipi"
-            value={camTipi}
-            onChange={(e) => setCamTipi(e.target.value)}
-            required
-            disabled={secilenFabrikalar.length === 0}
-          >
-            <option value="">Cam tipi seçin</option>
-            {secilenFabrikalar.length > 0 && [
-              ...(secilenFabrikalar.includes('A1') ? camTurleriA1.map((cam, index) => (
+        {/* Cam Tipi Seçimi - Her Fabrika İçin Ayrı */}
+        {secilenFabrikalar.includes('A1') && (
+          <div className="form-grup">
+            <label htmlFor="camTipiA1">A1 Fabrikası - Cam Tipi</label>
+            <select
+              id="camTipiA1"
+              value={camTipiA1}
+              onChange={(e) => setCamTipiA1(e.target.value)}
+              required
+            >
+              <option value="">A1 için cam tipi seçin</option>
+              {camTurleriA1.map((cam, index) => (
                 <option key={`a1-${index}`} value={`${cam.kalinlik} ${cam.tip}`}>
-                  A1 - {cam.kalinlik} {cam.tip}
+                  {cam.kalinlik} {cam.tip}
                 </option>
-              )) : []),
-              ...(secilenFabrikalar.includes('B1') ? camTurleriB1.map((cam, index) => (
+              ))}
+            </select>
+          </div>
+        )}
+        
+        {secilenFabrikalar.includes('B1') && (
+          <div className="form-grup">
+            <label htmlFor="camTipiB1">B1 Fabrikası - Cam Tipi</label>
+            <select
+              id="camTipiB1"
+              value={camTipiB1}
+              onChange={(e) => setCamTipiB1(e.target.value)}
+              required
+            >
+              <option value="">B1 için cam tipi seçin</option>
+              {camTurleriB1.map((cam, index) => (
                 <option key={`b1-${index}`} value={`${cam.kalinlik} ${cam.tip}`}>
-                  B1 - {cam.kalinlik} {cam.tip}
+                  {cam.kalinlik} {cam.tip}
                 </option>
-              )) : [])
-            ]}
-          </select>
-          {secilenFabrikalar.length === 0 && (
+              ))}
+            </select>
+          </div>
+        )}
+        
+        {secilenFabrikalar.length === 0 && (
+          <div className="form-grup">
+            <label>Cam Tipi</label>
             <small className="form-help-text">Önce fabrika seçimi yapın</small>
-          )}
-        </div>
+          </div>
+        )}
         
         <div className="form-row">
           <div className="form-grup">
@@ -399,8 +459,12 @@ const SiparisOlusturForm = () => {
                 <label key={istasyon.id} className="istasyon-secim">
                   <input
                     type="checkbox"
-                    checked={secilenIstasyonlar.includes(istasyon.id)}
-                    onChange={() => istasyonSecimDegistir(istasyon.id)}
+                    checked={
+                      fabrika === 'A1' 
+                        ? secilenIstasyonlarA1.includes(istasyon.id)
+                        : secilenIstasyonlarB1.includes(istasyon.id)
+                    }
+                    onChange={() => istasyonSecimDegistir(istasyon.id, fabrika)}
                   />
                   <span>{istasyon.name}</span>
                 </label>
@@ -413,11 +477,12 @@ const SiparisOlusturForm = () => {
           </div>
         </div>
         
-        {secilenIstasyonlar.length > 0 && (
+        {/* A1 Fabrikası İstasyon Sırası */}
+        {secilenIstasyonlarA1.length > 0 && (
           <div className="form-grup">
-            <label>İstasyon Sırası</label>
+            <label>A1 Fabrikası - İstasyon Sırası</label>
             <div className="istasyon-sirasi">
-              {secilenIstasyonlar.map((istasyonId, index) => {
+              {secilenIstasyonlarA1.map((istasyonId, index) => {
                 const istasyon = istasyonlar.find(i => i.id === istasyonId);
                 return (
                   <div key={istasyonId} className="istasyon-sira-item">
@@ -427,7 +492,7 @@ const SiparisOlusturForm = () => {
                       <button
                         type="button"
                         className="sira-btn"
-                        onClick={() => istasyonYukariTasi(index)}
+                        onClick={() => istasyonYukariTasi(index, 'A1')}
                         disabled={index === 0}
                       >
                         ↑
@@ -435,15 +500,58 @@ const SiparisOlusturForm = () => {
                       <button
                         type="button"
                         className="sira-btn"
-                        onClick={() => istasyonAsagiTasi(index)}
-                        disabled={index === secilenIstasyonlar.length - 1}
+                        onClick={() => istasyonAsagiTasi(index, 'A1')}
+                        disabled={index === secilenIstasyonlarA1.length - 1}
                       >
                         ↓
                       </button>
                       <button
                         type="button"
                         className="sira-btn sil"
-                        onClick={() => istasyonSil(istasyonId)}
+                        onClick={() => istasyonSil(istasyonId, 'A1')}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+        
+        {/* B1 Fabrikası İstasyon Sırası */}
+        {secilenIstasyonlarB1.length > 0 && (
+          <div className="form-grup">
+            <label>B1 Fabrikası - İstasyon Sırası</label>
+            <div className="istasyon-sirasi">
+              {secilenIstasyonlarB1.map((istasyonId, index) => {
+                const istasyon = istasyonlar.find(i => i.id === istasyonId);
+                return (
+                  <div key={istasyonId} className="istasyon-sira-item">
+                    <span className="sira-no">{index + 1}</span>
+                    <span className="istasyon-adi">{istasyon?.name}</span>
+                    <div className="sira-butonlar">
+                      <button
+                        type="button"
+                        className="sira-btn"
+                        onClick={() => istasyonYukariTasi(index, 'B1')}
+                        disabled={index === 0}
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        className="sira-btn"
+                        onClick={() => istasyonAsagiTasi(index, 'B1')}
+                        disabled={index === secilenIstasyonlarB1.length - 1}
+                      >
+                        ↓
+                      </button>
+                      <button
+                        type="button"
+                        className="sira-btn sil"
+                        onClick={() => istasyonSil(istasyonId, 'B1')}
                       >
                         ×
                       </button>
