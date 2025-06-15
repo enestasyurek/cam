@@ -2882,3 +2882,234 @@ select:-webkit-autofill:focus {
   background-color: var(--info-color);
   color: var(--button-text-color, white);
 }
+
+/* Sunum Modu Stilleri */
+.sunum-kontrolleri {
+  position: fixed;
+  top: var(--spacing-lg);
+  right: var(--spacing-lg);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  align-items: flex-end;
+}
+
+.sunum-toggle {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--white);
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-md);
+}
+
+.sunum-toggle:hover {
+  background-color: var(--primary-color);
+  color: var(--button-text-color, white);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.sunum-toggle.aktif {
+  background-color: var(--primary-color);
+  color: var(--button-text-color, white);
+  border-color: var(--primary-color);
+}
+
+.sunum-butonlari {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: var(--spacing-lg);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(10px);
+  animation: slideInRight 0.3s ease-out;
+}
+
+.demo-buton {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: var(--white);
+  border: 2px solid var(--gray-300);
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-base);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.demo-buton:hover {
+  transform: translateX(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.demo-buton:active {
+  transform: translateX(-2px);
+}
+
+.demo-buton:first-child {
+  background-color: var(--success-color);
+  color: var(--button-text-color, white);
+  border-color: var(--success-color);
+}
+
+.demo-buton.ilerlet {
+  background-color: var(--info-color);
+  color: var(--button-text-color, white);
+  border-color: var(--info-color);
+}
+
+.demo-buton.kirilan {
+  background-color: var(--danger-color);
+  color: var(--button-text-color, white);
+  border-color: var(--danger-color);
+}
+
+.sunum-ipucu {
+  font-size: 0.75rem;
+  color: var(--gray-600);
+  text-align: center;
+  padding: var(--spacing-xs);
+  background-color: var(--gray-100);
+  border-radius: var(--radius-md);
+  margin-top: var(--spacing-xs);
+}
+
+/* Sunum Modu Animasyonları */
+.app.sunum-modu .siparis-kart {
+  animation: pulseHighlight 2s ease-in-out infinite;
+}
+
+@keyframes pulseHighlight {
+  0%, 100% {
+    box-shadow: var(--shadow-md);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+}
+
+.app.sunum-modu .siparis-kart.yeni-eklendi {
+  animation: slideInScale 0.5s ease-out;
+}
+
+@keyframes slideInScale {
+  from {
+    transform: scale(0.8) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.app.sunum-modu .istasyon-kart:hover {
+  animation: bounce 0.5s ease-out;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-10px);
+  }
+  75% {
+    transform: translateY(-5px);
+  }
+}
+
+.app.sunum-modu .durum-rozet {
+  animation: statusPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.app.sunum-modu .dashboard {
+  transition: all var(--transition-base);
+}
+
+.app.sunum-modu .rapor-tablo tr:hover {
+  transform: translateX(4px);
+  background-color: rgba(16, 185, 129, 0.05);
+}
+
+/* Responsive sunum kontrolleri */
+@media (max-width: 768px) {
+  .sunum-kontrolleri {
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+  }
+  
+  .sunum-butonlari {
+    padding: var(--spacing-md);
+  }
+  
+  .demo-buton {
+    font-size: 0.875rem;
+    padding: var(--spacing-xs) var(--spacing-md);
+  }
+}
+
+/* Grafik Kartları */
+.grafikler-rapor {
+  padding: var(--spacing-xl) 0;
+}
+
+.grafikler-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
+}
+
+.grafik-kart {
+  background-color: var(--white);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-base);
+}
+
+.grafik-kart:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.grafik-kart h3 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-lg);
+}
+
+.grafik-kart.tam-genislik {
+  grid-column: span 2;
+}
+
+/* Responsive grafikler */
+@media (max-width: 1024px) {
+  .grafikler-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .grafik-kart.tam-genislik {
+    grid-column: span 1;
+  }
+}

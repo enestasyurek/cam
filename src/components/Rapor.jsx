@@ -1,7 +1,15 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useFabrika } from '../context/FabrikaContext';
 import KirilanCamModal from './KirilanCamModal';
 import SiparisDuzenleModal from './SiparisDuzenleModal';
+import KPIDashboard from './KPIDashboard';
+import ErrorBoundary from './ErrorBoundary';
+
+// Lazy load chart components
+const SiparisChart = lazy(() => import('./charts/SiparisChart'));
+const IstasyonChart = lazy(() => import('./charts/IstasyonChart'));
+const UretimTrendChart = lazy(() => import('./charts/UretimTrendChart'));
+const PerformansChart = lazy(() => import('./charts/PerformansChart'));
 
 const Rapor = () => {
   const { 
@@ -15,7 +23,7 @@ const Rapor = () => {
   } = useFabrika();
   
   const [aramaMetni, setAramaMetni] = useState('');
-  const [sekmeler, setSekmeler] = useState('genel'); // genel, detay, istasyon, kirilan, kuyruk
+  const [sekmeler, setSekmeler] = useState('genel'); // genel, detay, istasyon, kirilan, kuyruk, grafikler
   const [modaller, setModaller] = useState({
     kirilan: false,
     duzenle: false,
@@ -98,9 +106,9 @@ const Rapor = () => {
 
       {/* Arama Alanı */}
       <div className="arama-alani">
-        <input
+        <input 
           type="text"
-          placeholder="Sipariş No, Müşteri veya Cari Ünvan ile ara..."
+          placeholder="🔍 Sipariş no, müşteri adı veya cari ünvan ile ara..."
           value={aramaMetni}
           onChange={(e) => setAramaMetni(e.target.value)}
           className="arama-input"
@@ -173,6 +181,12 @@ const Rapor = () => {
         >
           İstasyon Kuyrukları
         </button>
+        <button 
+          className={`sekme-btn ${sekmeler === 'grafikler' ? 'aktif' : ''}`}
+          onClick={() => setSekmeler('grafikler')}
+        >
+          Grafikler & Analizler
+        </button>
       </div>
 
       {/* Sekme İçerikleri */}
@@ -212,12 +226,18 @@ const Rapor = () => {
                           <span className="metrik-deger mavi">{fabrikaDevam}</span>
                         </div>
                         <div className="metrik">
-                          <span className="metrik-etiket">Üretim:</span>
-                          <span className="metrik-deger">{fabrikaMiktar.toFixed(2)} m²</span>
+                          <span className="metrik-etiket">Toplam Üretim:</span>
+                          <span className="metrik-deger">{fabrikaMiktar.toFixed(1)} m²</span>
                         </div>
                         <div className="metrik">
-                          <span className="metrik-etiket">Kırılan:</span>
+                          <span className="metrik-etiket">Kırılan Cam:</span>
                           <span className="metrik-deger kirmizi">{fabrikaKirilan} adet</span>
+                        </div>
+                        <div className="metrik">
+                          <span className="metrik-etiket">Verimlilik:</span>
+                          <span className="metrik-deger">
+                            %{fabrikaSiparisleri.length > 0 ? Math.round((fabrikaTamamlanan / fabrikaSiparisleri.length) * 100) : 0}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -225,136 +245,121 @@ const Rapor = () => {
                 })}
               </div>
             </div>
-            
+
             {/* Cam Tipi Analizi */}
             <div className="cam-tipi-analizi">
               <h4>Cam Tipi Bazlı Analiz</h4>
-              <div className="tablo-container">
-                <table className="rapor-tablo">
-                  <thead>
-                    <tr>
-                      <th>Cam Tipi</th>
-                      <th>Sipariş Sayısı</th>
-                      <th>Toplam Adet</th>
-                      <th>Toplam m²</th>
-                      <th>Kırılan</th>
-                      <th>Verimlilik</th>
+              <table className="rapor-tablo">
+                <thead>
+                  <tr>
+                    <th>Cam Tipi</th>
+                    <th>Sipariş Sayısı</th>
+                    <th>Toplam Miktar (m²)</th>
+                    <th>Ortalama Miktar</th>
+                    <th>Durum</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(
+                    siparisler.reduce((acc, siparis) => {
+                      const tip = siparis.camTipi || 'Belirtilmemiş';
+                      if (!acc[tip]) {
+                        acc[tip] = {
+                          sayi: 0,
+                          miktar: 0,
+                          tamamlanan: 0,
+                          devam: 0
+                        };
+                      }
+                      acc[tip].sayi += 1;
+                      acc[tip].miktar += siparis.toplamMiktar;
+                      if (siparis.durum === 'Tamamlandı') {
+                        acc[tip].tamamlanan += 1;
+                      } else {
+                        acc[tip].devam += 1;
+                      }
+                      return acc;
+                    }, {})
+                  ).map(([tip, veri]) => (
+                    <tr key={tip}>
+                      <td>{tip}</td>
+                      <td>{veri.sayi}</td>
+                      <td>{veri.miktar.toFixed(2)}</td>
+                      <td>{(veri.miktar / veri.sayi).toFixed(2)}</td>
+                      <td>
+                        <span className="durum-ozet">
+                          ✅ {veri.tamamlanan} | ⏳ {veri.devam}
+                        </span>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {Object.entries(
-                      siparisler.reduce((acc, siparis) => {
-                        const tip = siparis.camKombinasyonu || siparis.camTipi || 'Bilinmiyor';
-                        if (!acc[tip]) {
-                          acc[tip] = {
-                            count: 0,
-                            adet: 0,
-                            miktar: 0,
-                            kirilan: 0
-                          };
-                        }
-                        acc[tip].count++;
-                        acc[tip].adet += siparis.adet;
-                        acc[tip].miktar += siparis.toplamMiktar;
-                        acc[tip].kirilan += siparis.kirilanAdet || 0;
-                        return acc;
-                      }, {})
-                    ).map(([tip, data]) => (
-                      <tr key={tip}>
-                        <td>{tip}</td>
-                        <td>{data.count}</td>
-                        <td>{data.adet}</td>
-                        <td>{data.miktar.toFixed(2)}</td>
-                        <td className="kirmizi">{data.kirilan}</td>
-                        <td>{data.adet > 0 ? ((1 - data.kirilan / data.adet) * 100).toFixed(1) : 100}%</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
-        
+
         {sekmeler === 'detay' && (
-          <div className="siparis-listesi">
-            <h3>Sipariş Listesi {aramaMetni && `(${filtrelenmisiSiparisler.length} sonuç)`}</h3>
+          <div className="detay-rapor">
+            <h3>Tüm Siparişler ({filtrelenmisiSiparisler.length} adet)</h3>
             <div className="tablo-container">
               <table className="rapor-tablo">
                 <thead>
                   <tr>
                     <th>Sipariş No</th>
                     <th>Müşteri</th>
+                    <th>Proje</th>
                     <th>Cam Tipi</th>
-                    <th>Fabrika</th>
+                    <th>Miktar</th>
                     <th>Adet</th>
-                    <th>M²</th>
+                    <th>Fabrika</th>
                     <th>Durum</th>
-                    <th>Güncel İstasyon</th>
-                    <th>İlerleme</th>
+                    <th>Teslim</th>
                     <th>İşlemler</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filtrelenmisiSiparisler.map(siparis => {
-                    const ilerlemeYuzdesi = siparis.istasyonSirasi.length > 0 
-                      ? Math.round((siparis.guncelIstasyonIndex / siparis.istasyonSirasi.length) * 100)
-                      : 0;
-                    const guncelIstasyon = siparis.guncelIstasyonIndex < siparis.istasyonSirasi.length
-                      ? istasyonlar.find(i => i.id === siparis.istasyonSirasi[siparis.guncelIstasyonIndex])
-                      : null;
-
-                    return (
-                      <tr key={siparis.id}>
-                        <td>{siparis.siparisNo}</td>
-                        <td>{siparis.musteri}</td>
-                        <td>{siparis.camKombinasyonu || siparis.camTipi || 'Bilinmiyor'}</td>
-                        <td>{siparis.fabrika || 'A1'}</td>
-                        <td>
-                          {siparis.adet}
-                          {siparis.kirilanAdet > 0 && (
-                            <span className="kirilan-badge"> (-{siparis.kirilanAdet})</span>
-                          )}
-                        </td>
-                        <td>{siparis.toplamMiktar}</td>
-                        <td>
-                          <span className={`durum-badge ${siparis.durum.toLowerCase()}`}>
-                            {siparis.durum}
-                          </span>
-                        </td>
-                        <td>{guncelIstasyon ? guncelIstasyon.name : 'Tamamlandı'}</td>
-                        <td>
-                          <div className="ilerleme-bar">
-                            <div 
-                              className="ilerleme-dolu" 
-                              style={{ width: `${ilerlemeYuzdesi}%` }}
-                            />
-                            <span className="ilerleme-metin">{ilerlemeYuzdesi}%</span>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="tablo-butonlar">
+                  {filtrelenmisiSiparisler.map(siparis => (
+                    <tr key={siparis.id}>
+                      <td>{siparis.siparisNo}</td>
+                      <td>{siparis.musteri}</td>
+                      <td>{siparis.projeAdi}</td>
+                      <td>{siparis.camTipi}</td>
+                      <td>{siparis.toplamMiktar} m²</td>
+                      <td>{siparis.adet}</td>
+                      <td>
+                        <span className={`fabrika-badge ${siparis.fabrika.toLowerCase()}`}>
+                          {siparis.fabrika}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={`durum-badge ${siparis.durum.toLowerCase().replace(/\s+/g, '-')}`}>
+                          {siparis.durum}
+                        </span>
+                      </td>
+                      <td>{new Date(siparis.teslimTarihi).toLocaleDateString('tr-TR')}</td>
+                      <td>
+                        <div className="btn-group">
+                          <button 
+                            className="btn-sm btn-primary"
+                            onClick={() => modalAc('duzenle', siparis)}
+                            title="Düzenle"
+                          >
+                            ✏️
+                          </button>
+                          {siparis.durum === 'İşlemde' && (
                             <button 
-                              className="btn btn-warning btn-sm"
-                              onClick={() => modalAc('duzenle', siparis)}
-                              title="Siparişi Düzenle"
+                              className="btn-sm btn-danger"
+                              onClick={() => modalAc('kirilan', siparis, siparis.istasyonSirasi[siparis.guncelIstasyonIndex])}
+                              title="Kırılan Cam"
                             >
-                              ✏️
+                              💔
                             </button>
-                            {guncelIstasyon && siparis.durum !== 'Tamamlandı' && (
-                              <button 
-                                className="btn btn-danger btn-sm"
-                                onClick={() => modalAc('kirilan', siparis, guncelIstasyon.id)}
-                                title="Kırılan Cam Bildir"
-                              >
-                                🔴
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -362,110 +367,67 @@ const Rapor = () => {
         )}
 
         {sekmeler === 'istasyon' && (
-          <div className="istasyon-raporu">
-            <h3>İstasyon Bazlı Detaylı Rapor</h3>
-            
-            {/* İstasyon Performans Kartları */}
+          <div className="istasyon-rapor">
+            <h3>İstasyon Performans Raporu</h3>
             <div className="istasyon-grid">
               {istasyonlar.map(istasyon => {
-                // İstasyona gelen siparişler
-                const istasyonSiparisleri = siparisler.filter(siparis => 
-                  siparis.istasyonSirasi.includes(istasyon.id)
+                const istasyonSiparisleri = siparisler.filter(s => 
+                  s.istasyonSirasi.includes(istasyon.id)
                 );
-                
-                // İstasyonda şu an bekleyen/işlemde olan
                 const aktifSiparisler = istasyonSiparisleriGetir(istasyon.id);
-                
-                // İstasyonda tamamlanan
-                const tamamlananSiparisler = siparisler.filter(siparis => {
-                  const istasyonIndex = siparis.istasyonSirasi.indexOf(istasyon.id);
-                  return istasyonIndex !== -1 && istasyonIndex < siparis.guncelIstasyonIndex;
+                const tamamlananlar = istasyonSiparisleri.filter(s => {
+                  const istasyonIndex = s.istasyonSirasi.indexOf(istasyon.id);
+                  return s.gecmis[istasyonIndex]?.bitisSaati;
                 });
-                
-                // İstasyondaki kırılan camlar
-                const istasyonKirilan = kirilanCamlar.filter(k => k.istasyonId === istasyon.id);
-                const toplamKirilan = istasyonKirilan.reduce((t, k) => t + k.adet, 0);
-                
-                // İstasyon verimliliği
-                const toplamIslenen = tamamlananSiparisler.reduce((t, s) => t + s.adet, 0);
-                const verimlilik = toplamIslenen > 0 
-                  ? ((toplamIslenen - toplamKirilan) / toplamIslenen * 100).toFixed(1)
-                  : 100;
-                
-                // Ortalama işlem süresi
-                const tamamlananSureler = tamamlananSiparisler
-                  .map(siparis => {
-                    const istasyonIndex = siparis.istasyonSirasi.indexOf(istasyon.id);
-                    const gecmis = siparis.gecmis[istasyonIndex];
-                    if (gecmis && gecmis.baslamaSaati && gecmis.bitisSaati) {
-                      return new Date(gecmis.bitisSaati) - new Date(gecmis.baslamaSaati);
-                    }
-                    return null;
-                  })
-                  .filter(sure => sure !== null);
-                
-                const ortalamaIslemSuresi = tamamlananSureler.length > 0
-                  ? Math.round(tamamlananSureler.reduce((t, s) => t + s, 0) / tamamlananSureler.length / 60000)
+                const ortalamaSure = tamamlananlar.length > 0
+                  ? tamamlananlar.reduce((toplam, s) => {
+                      const istasyonIndex = s.istasyonSirasi.indexOf(istasyon.id);
+                      const baslama = new Date(s.gecmis[istasyonIndex].baslamaSaati);
+                      const bitis = new Date(s.gecmis[istasyonIndex].bitisSaati);
+                      return toplam + (bitis - baslama) / (1000 * 60 * 60);
+                    }, 0) / tamamlananlar.length
                   : 0;
-                
+
                 return (
-                  <div key={istasyon.id} className="istasyon-rapor-kart">
+                  <div key={istasyon.id} className="istasyon-kart-rapor">
                     <div className="istasyon-baslik">
                       <h4>{istasyon.name}</h4>
-                      <span className="fabrika-etiketi">{istasyon.fabrika}</span>
+                      <span className={`fabrika-badge ${istasyon.fabrika.toLowerCase()}`}>
+                        {istasyon.fabrika}
+                      </span>
                     </div>
-                    
                     <div className="istasyon-metrikler">
-                      <div className="metrik-satir">
-                        <span>Toplam İş:</span>
-                        <strong>{istasyonSiparisleri.length}</strong>
+                      <div className="metrik">
+                        <span className="metrik-etiket">Toplam İşlem:</span>
+                        <span className="metrik-deger">{istasyonSiparisleri.length}</span>
                       </div>
-                      <div className="metrik-satir">
-                        <span>Bekleyen:</span>
-                        <strong className="mavi">{aktifSiparisler.length}</strong>
+                      <div className="metrik">
+                        <span className="metrik-etiket">Aktif:</span>
+                        <span className="metrik-deger mavi">{aktifSiparisler.length}</span>
                       </div>
-                      <div className="metrik-satir">
-                        <span>Tamamlanan:</span>
-                        <strong className="yesil">{tamamlananSiparisler.length}</strong>
+                      <div className="metrik">
+                        <span className="metrik-etiket">Tamamlanan:</span>
+                        <span className="metrik-deger yesil">{tamamlananlar.length}</span>
                       </div>
-                      <div className="metrik-satir">
-                        <span>Kırılan:</span>
-                        <strong className="kirmizi">{toplamKirilan} adet</strong>
+                      <div className="metrik">
+                        <span className="metrik-etiket">Ort. Süre:</span>
+                        <span className="metrik-deger">{ortalamaSure.toFixed(1)} saat</span>
                       </div>
-                      <div className="metrik-satir">
-                        <span>Verimlilik:</span>
-                        <strong className={verimlilik >= 95 ? 'yesil' : verimlilik >= 90 ? 'turuncu' : 'kirmizi'}>
-                          %{verimlilik}
-                        </strong>
+                      <div className="metrik">
+                        <span className="metrik-etiket">Kırılan:</span>
+                        <span className="metrik-deger kirmizi">
+                          {istasyonKirilanIstatistik.find(i => i.id === istasyon.id)?.kirilanAdet || 0} adet
+                        </span>
                       </div>
-                      <div className="metrik-satir">
-                        <span>Ort. Süre:</span>
-                        <strong>{ortalamaIslemSuresi} dk</strong>
+                      <div className="metrik">
+                        <span className="metrik-etiket">Verimlilik:</span>
+                        <span className="metrik-deger">
+                          %{istasyonSiparisleri.length > 0 
+                            ? Math.round((tamamlananlar.length / istasyonSiparisleri.length) * 100) 
+                            : 0}
+                        </span>
                       </div>
                     </div>
-                    
-                    {/* Kırılan cam detayları */}
-                    {istasyonKirilan.length > 0 && (
-                      <div className="kirilan-detay">
-                        <h5>Kırılan Camlar:</h5>
-                        <ul>
-                          {istasyonKirilan.slice(0, 3).map(k => {
-                            const siparis = siparisler.find(s => s.id === k.siparisId);
-                            return (
-                              <li key={k.id}>
-                                {siparis?.siparisNo || 'Bilinmiyor'} - {k.adet} adet
-                                {k.aciklama && <em> ({k.aciklama})</em>}
-                              </li>
-                            );
-                          })}
-                          {istasyonKirilan.length > 3 && (
-                            <li className="daha-fazla">
-                              ve {istasyonKirilan.length - 3} kayıt daha...
-                            </li>
-                          )}
-                        </ul>
-                      </div>
-                    )}
                   </div>
                 );
               })}
@@ -474,62 +436,52 @@ const Rapor = () => {
         )}
 
         {sekmeler === 'kirilan' && (
-          <div className="kirilan-cam-listesi">
-            <h3>İstasyon Bazlı Kırılan Cam İstatistikleri</h3>
-            <div className="tablo-container">
-              <table className="rapor-tablo">
-                <thead>
-                  <tr>
-                    <th>İstasyon</th>
-                    <th>Fabrika</th>
-                    <th>Toplam Kırılan</th>
-                    <th>Kayıt Sayısı</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {istasyonKirilanIstatistik
-                    .filter(i => i.kirilanAdet > 0)
-                    .map(istasyon => (
-                      <tr key={istasyon.id}>
-                        <td>{istasyon.name}</td>
-                        <td>{istasyon.fabrika}</td>
-                        <td className="kirmizi">{istasyon.kirilanAdet} adet</td>
-                        <td>{istasyon.kirilanKayitSayisi}</td>
-                      </tr>
-                  ))}
-                </tbody>
-              </table>
+          <div className="kirilan-rapor">
+            <h3>Kırılan Cam Kayıtları ({kirilanCamlar.length} kayıt)</h3>
+            <div className="kirilan-ozet">
+              <div className="ozet-kart">
+                <h4>Toplam Kırılan</h4>
+                <div className="ozet-deger kirmizi">{toplamKirilanCam} adet</div>
+              </div>
+              <div className="ozet-kart">
+                <h4>Etkilenen Sipariş</h4>
+                <div className="ozet-deger">{new Set(kirilanCamlar.map(k => k.siparisId)).size}</div>
+              </div>
+              <div className="ozet-kart">
+                <h4>Kırılma Oranı</h4>
+                <div className="ozet-deger">%{toplamAdet > 0 ? ((toplamKirilanCam / toplamAdet) * 100).toFixed(2) : 0}</div>
+              </div>
             </div>
-
-            <h3>Kırılan Cam Detayları</h3>
-            <div className="tablo-container">
-              <table className="rapor-tablo">
-                <thead>
-                  <tr>
-                    <th>Tarih</th>
-                    <th>İstasyon</th>
-                    <th>Sipariş No</th>
-                    <th>Adet</th>
-                    <th>Açıklama</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {kirilanCamlar.map(kirilan => {
-                    const istasyon = istasyonlar.find(i => i.id === kirilan.istasyonId);
-                    const siparis = siparisler.find(s => s.id === kirilan.siparisId);
-                    return (
-                      <tr key={kirilan.id}>
-                        <td>{new Date(kirilan.tarih).toLocaleString('tr-TR')}</td>
-                        <td>{istasyon ? istasyon.name : kirilan.istasyonId}</td>
-                        <td>{siparis ? siparis.siparisNo : '-'}</td>
-                        <td className="kirmizi">{kirilan.adet}</td>
-                        <td>{kirilan.aciklama}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+            
+            <table className="rapor-tablo">
+              <thead>
+                <tr>
+                  <th>Tarih</th>
+                  <th>İstasyon</th>
+                  <th>Sipariş No</th>
+                  <th>Müşteri</th>
+                  <th>Miktar</th>
+                  <th>Açıklama</th>
+                </tr>
+              </thead>
+              <tbody>
+                {kirilanCamlar.map(kirilan => {
+                  const siparis = siparisler.find(s => s.id === kirilan.siparisId);
+                  const istasyon = istasyonlar.find(i => i.id === kirilan.istasyonId);
+                  
+                  return (
+                    <tr key={kirilan.id}>
+                      <td>{new Date(kirilan.tarih).toLocaleString('tr-TR')}</td>
+                      <td>{istasyon?.name || '-'}</td>
+                      <td>{siparis?.siparisNo || '-'}</td>
+                      <td>{siparis?.musteri || '-'}</td>
+                      <td className="kirmizi">{kirilan.adet} adet</td>
+                      <td>{kirilan.aciklama}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
 
@@ -537,32 +489,78 @@ const Rapor = () => {
           <div className="kuyruk-durumu">
             <h3>İstasyon Kuyruk Durumları</h3>
             <div className="kuyruk-grid">
-              {kuyrukDurumu.map(istasyon => (
-                <div key={istasyon.id} className="kuyruk-kart">
-                  <h4>{istasyon.name}</h4>
-                  <div className="kuyruk-bilgi">
-                    <span className="kuyruk-sayi">{istasyon.kuyrukUzunlugu}</span>
-                    <span className="kuyruk-metin">sipariş bekliyor</span>
+              {kuyrukDurumu
+                .filter(k => k.kuyrukUzunlugu > 0)
+                .sort((a, b) => b.kuyrukUzunlugu - a.kuyrukUzunlugu)
+                .map(kuyruk => (
+                <div key={kuyruk.id} className="kuyruk-kart">
+                  <div className="kuyruk-baslik">
+                    <h4>{kuyruk.name}</h4>
+                    <span className={`kuyruk-badge ${kuyruk.kuyrukUzunlugu > 5 ? 'kirmizi' : kuyruk.kuyrukUzunlugu > 2 ? 'sari' : 'yesil'}`}>
+                      {kuyruk.kuyrukUzunlugu} sipariş
+                    </span>
                   </div>
-                  {istasyon.kuyruktakiSiparisler.length > 0 && (
-                    <div className="kuyruk-siparisler">
-                      <h5>Bekleyen Siparişler:</h5>
-                      <ul>
-                        {istasyon.kuyruktakiSiparisler.slice(0, 5).map(siparis => (
-                          <li key={siparis.id}>
-                            {siparis.siparisNo} - {siparis.musteri} ({siparis.adet} adet)
-                          </li>
-                        ))}
-                        {istasyon.kuyruktakiSiparisler.length > 5 && (
-                          <li className="daha-fazla">
-                            ve {istasyon.kuyruktakiSiparisler.length - 5} sipariş daha...
-                          </li>
-                        )}
-                      </ul>
+                  <div className="kuyruk-detay">
+                    <p className="fabrika-info">{kuyruk.fabrika} Fabrikası</p>
+                    <ul className="kuyruk-liste">
+                      {kuyruk.kuyruktakiSiparisler.map(siparis => (
+                        <li key={siparis.id}>
+                          <span className="siparis-no">{siparis.siparisNo}</span>
+                          <span className="musteri">{siparis.musteri}</span>
+                          <span className={`oncelik oncelik-${siparis.oncelik}`}>
+                            Öncelik: {siparis.oncelik}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  {kuyruk.kuyrukUzunlugu > 5 && (
+                    <div className="uyari-mesaj">
+                      ⚠️ Yüksek yoğunluk! Kapasite artırımı gerekebilir.
                     </div>
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        )}
+
+        {sekmeler === 'grafikler' && (
+          <div className="grafikler-rapor">
+            {/* KPI Dashboard */}
+            <KPIDashboard />
+            
+            {/* Grafikler Grid */}
+            <div className="grafikler-grid">
+              <Suspense fallback={<div style={{ padding: '20px', textAlign: 'center' }}>Yükleniyor...</div>}>
+                <div className="grafik-kart">
+                  <h3>Sipariş Trend Analizi</h3>
+                  <ErrorBoundary>
+                    <SiparisChart siparisler={siparisler} />
+                  </ErrorBoundary>
+                </div>
+                
+                <div className="grafik-kart">
+                  <h3>İstasyon Yoğunluk Dağılımı</h3>
+                  <ErrorBoundary>
+                    <IstasyonChart siparisler={siparisler} istasyonlar={istasyonlar} />
+                  </ErrorBoundary>
+                </div>
+                
+                <div className="grafik-kart tam-genislik">
+                  <h3>Üretim Performans Trendi</h3>
+                  <ErrorBoundary>
+                    <UretimTrendChart siparisler={siparisler} />
+                  </ErrorBoundary>
+                </div>
+                
+                <div className="grafik-kart tam-genislik">
+                  <h3>İstasyon Performans Metrikleri</h3>
+                  <ErrorBoundary>
+                    <PerformansChart siparisler={siparisler} istasyonlar={istasyonlar} />
+                  </ErrorBoundary>
+                </div>
+              </Suspense>
             </div>
           </div>
         )}
